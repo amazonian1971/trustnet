@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, query, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, updateDoc, deleteDoc, doc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Helper function to convert Firestore date objects to JavaScript Date objects
@@ -32,161 +32,9 @@ const calculateTrustImpact = (interactionType: string) => {
   return impacts[interactionType] || 1;
 };
 
-// TrustNet Knowledge Base for AI Support
-const TRUSTNET_FAQ = [
-  // Account Setup & Profile
-  {
-    question: "How do I create a TrustNet account?",
-    answer: "You can create a TrustNet account by clicking the 'Sign Up' button on the homepage and following the prompts. You'll need to provide your name, email address, and create a password. We also support social logins through Google and other providers.",
-    category: "account"
-  },
-  {
-    question: "How do I update my profile information?",
-    answer: "To update your profile, click on your profile icon in the top right corner of the dashboard, then select 'Profile' from the dropdown menu. From there, you can edit your name, profile picture, bio, and other personal information.",
-    category: "account"
-  },
-  {
-    question: "How do I change my email address or password?",
-    answer: "To change your email address or password, go to your Profile settings, then click on the 'Account Settings' tab. Here you can update your email address and reset your password.",
-    category: "account"
-  },
-  
-  // Creating Promises
-  {
-    question: "How do I create a new promise?",
-    answer: "To create a new promise, click the 'New Promise' button on the dashboard. Enter your promise details including title, emoji, deadline, and select contacts to share it with. Then click 'Plant It' to create your promise.",
-    category: "promises"
-  },
-  {
-    question: "What is the difference between a promise and a trust circle?",
-    answer: "A promise is a specific commitment you make to yourself or others with a defined timeframe. A Trust Circle is a small group (3-5 people) of accountability partners who support each other with their promises.",
-    category: "promises"
-  },
-  {
-    question: "How do I share a promise with others?",
-    answer: "When creating a promise, you can add contacts by clicking the 'Share with others' section. You can add family, friends, or colleagues by entering their phone number or email address.",
-    category: "promises"
-  },
-  
-  // Trust Circles
-  {
-    question: "How do I create a Trust Circle?",
-    answer: "Click the '+ New Circle' button in the Trust Circles section of your dashboard. Give your circle a name, description, and add 2-4 members (for a total of 3-5 people including yourself).",
-    category: "circles"
-  },
-  {
-    question: "How many people can be in a Trust Circle?",
-    answer: "Trust Circles are intentionally small for meaningful connections - they must have between 3 and 5 members total (including yourself).",
-    category: "circles"
-  },
-  {
-    question: "Can I join multiple Trust Circles?",
-    answer: "Yes, you can be a member of multiple Trust Circles. This allows you to have different circles for different aspects of your life (work, personal, fitness, etc.).",
-    category: "circles"
-  },
-  
-  // Trust Score System
-  {
-    question: "How is my Trust Score calculated?",
-    answer: "Your Trust Score is calculated based on your promise completion rate, how consistently you follow through on commitments, and the feedback from your accountability partners. Completing promises on time and supporting others in their promises increases your score.",
-    category: "score"
-  },
-  {
-    question: "What's the maximum Trust Score?",
-    answer: "The Trust Score ranges from 0-100%. As you consistently follow through on your promises and build trust with others, your score will increase.",
-    category: "score"
-  },
-  {
-    question: "How can I improve my Trust Score?",
-    answer: "You can improve your Trust Score by: 1) Completing promises on time, 2) Supporting others in their promises (using Believe/Inspire/Support buttons), 3) Creating and participating in Trust Circles, and 4) Consistently following through on your commitments.",
-    category: "score"
-  },
-  
-  // Dashboard Navigation
-  {
-    question: "What do the different tabs mean?",
-    answer: "The dashboard has three main tabs: Active (shows promises you're currently working on), Completed (shows promises you've successfully completed), and Archived (shows promises you've archived for reference).",
-    category: "dashboard"
-  },
-  {
-    question: "How do I read the Trust Snapshot?",
-    answer: "The Trust Snapshot shows your current Trust Score (0-100%) and key metrics including Endorsements (completed promises), Recent Agreements, In Progress promises, and Completed promises.",
-    category: "dashboard"
-  },
-  {
-    question: "What is the Daily Builder?",
-    answer: "The Daily Builder is a guided activity that helps you build trust through specific actions. Each day focuses on a different aspect of trust-building: Day 1 is Promise Flow, Day 2 is Reputation Logic, and Day 3 is UX Resonance.",
-    category: "dashboard"
-  },
-  
-  // Troubleshooting
-  {
-    question: "I can't see my promises. What should I do?",
-    answer: "First check which tab you're on (Active, Completed, Archived). If you still don't see your promises, try refreshing the page. If the issue persists, contact support@trustnet.example.com.",
-    category: "troubleshooting"
-  },
-  {
-    question: "My Trust Score isn't updating. What's wrong?",
-    answer: "Trust Score updates may take a few moments to process. If it hasn't updated after 24 hours, please contact our support team.",
-    category: "troubleshooting"
-  },
-  {
-    question: "I'm having trouble adding contacts to my promise. What should I do?",
-    answer: "Make sure you're entering the contact information correctly (phone number with country code or valid email address). If you're still having issues, try logging out and back in, or contact support.",
-    category: "troubleshooting"
-  },
-  
-  // Special Focus: PROMISES
-  {
-    question: "What makes a good promise?",
-    answer: "A good promise is SMART: Specific, Measurable, Achievable, Relevant, and Time-bound. It should be something you genuinely want to accomplish and can realistically commit to. Remember, trust is built through consistent action over time.",
-    category: "promises"
-  },
-  {
-    question: "How often should I make new promises?",
-    answer: "Quality over quantity. It's better to make 1-2 meaningful promises you can follow through on than many promises you can't keep. Start with what you can realistically handle, then gradually increase as your trust muscle strengthens.",
-    category: "promises"
-  },
-  {
-    question: "What happens if I break a promise?",
-    answer: "Breaking a promise will impact your Trust Score. The best approach is to communicate with your accountability partners and recommit to a revised timeline if needed. Remember, trust is built through consistent action over time - one misstep doesn't define your entire journey.",
-    category: "promises"
-  },
-  {
-    question: "How do I handle multiple promises at once?",
-    answer: "Focus on prioritization. Use the 'Next Actions' section of your dashboard to see which promises need immediate attention. Consider staggering your promises so they don't all have deadlines at the same time. Quality completion of fewer promises builds more trust than partial completion of many.",
-    category: "promises"
-  },
-  {
-    question: "Why are promises limited to small groups?",
-    answer: "Trust grows in small, intentional communities. Large networks dilute accountability, while small groups (3-5 people) create the psychological safety needed for authentic trust-building. This is why Trust Circles are limited to 3-5 members - it's scientifically proven to be the optimal size for meaningful connections.",
-    category: "promises"
-  },
-  {
-    question: "How do I make my promises more effective?",
-    answer: "Three key elements make promises effective: 1) Emotional resonance (add why it matters to you), 2) Clear milestones (break it into smaller steps), and 3) Appropriate accountability (share with the right people). Your Daily Builder guides you through these elements systematically.",
-    category: "promises"
-  }
-];
-
-// AI Support Bot Responses for Out-of-Scope Questions
-const OUT_OF_SCOPE_RESPONSES = [
-  "I'm your TrustNet AI assistant, focused specifically on helping you build trust through promises and accountability. Let's stay focused on how I can help with TrustNet!",
-  "As your TrustNet support specialist, I'm here to help with anything related to promises, trust circles, and building authentic connections. How can I assist with TrustNet today?",
-  "I specialize in TrustNet functionality and the science of building trust through small accountability groups. I'd be happy to help you navigate any aspect of the platform!"
-];
-
-// AI Support Bot Responses for Promise-Specific Questions
-const PROMISE_SPECIALIST_RESPONSES = [
-  "Promises are the foundation of trust. Each promise you make and keep strengthens your trust muscle. Remember: quality over quantity - one meaningful promise kept is worth more than ten broken.",
-  "In TrustNet, a promise isn't just a goal - it's a commitment to build trust through accountability. The magic happens in the small, consistent actions between you and your accountability partners.",
-  "The science of promises: They work because they create psychological commitment. When you share a promise, you're not just setting a goal - you're building social accountability that increases your follow-through by 65%.",
-  "Your promises are your trust currency. Each one represents an opportunity to build or erode trust. Focus on making promises you can keep, then keep them consistently - that's how trust compounds over time."
-];
-
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
-  const [streak] = useState(7);
+  const [streak, setStreak] = useState(0);
   const [growthLevel, setGrowthLevel] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState('');
@@ -197,7 +45,6 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('active');
   const [activeFeedTab, setActiveFeedTab] = useState('all');
   const [feedSort, setFeedSort] = useState('recent');
-  const [chainReactions, setChainReactions] = useState(3);
   const [darkMode, setDarkMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showLaunchSequence, setShowLaunchSequence] = useState(false);
@@ -213,9 +60,8 @@ export default function Dashboard() {
     type: 'phone',
     forCircle: false
   });
-  const [trustScore, setTrustScore] = useState(87);
+  const [trustScore, setTrustScore] = useState(0);
   const [showTrustRipple, setShowTrustRipple] = useState(false);
-  const [userType, setUserType] = useState('first-time');
   const [showTrustCircleModal, setShowTrustCircleModal] = useState(false);
   const [circleName, setCircleName] = useState('');
   const [circleDescription, setCircleDescription] = useState('');
@@ -275,31 +121,6 @@ export default function Dashboard() {
     return filteredPosts;
   };
 
-  // Glassmorphism effect helper
-  const glassEffect = (dark: boolean) => ({
-    background: dark 
-      ? 'rgba(42, 0, 102, 0.3)' 
-      : 'rgba(255, 255, 255, 0.7)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-    border: dark 
-      ? '1px solid rgba(123, 66, 245, 0.2)' 
-      : '1px solid rgba(200, 200, 200, 0.2)',
-  });
-  
-  // Trust-focused tag button style
-  const trustTagButtonStyle = (dark: boolean) => ({
-    padding: '6px 12px',
-    borderRadius: '20px',
-    background: dark ? '#333' : '#f0f0f0',
-    color: dark ? '#ddd' : '#333',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    flex: 1,
-    fontWeight: '500'
-  });
-
   // Load theme
   useEffect(() => {
     const saved = localStorage.getItem('darkMode');
@@ -328,49 +149,53 @@ export default function Dashboard() {
         router.push('/auth');
       } else {
         setUser(user);
-        
-        // Determine user type based on activity
-        setTimeout(() => {
-          const userActivity = localStorage.getItem(`userActivity_${user.uid}`);
-          if (!userActivity) {
-            setUserType('first-time');
-            localStorage.setItem(`userActivity_${user.uid}`, JSON.stringify({
-              firstVisit: new Date().toISOString(),
-              promisesCreated: 0,
-              trustScore: 85,
-              hasCompletedOnboarding: false
-            }));
-            
-            // Show onboarding for first-time users
-            setTimeout(() => {
-              setShowOnboarding(true);
-              setHasCompletedOnboarding(false);
-            }, 1000);
-          } else {
-            const activity = JSON.parse(userActivity);
-            if (activity.promisesCreated < 2) {
-              setUserType('first-time');
-            } else if (activity.promisesCreated < 10) {
-              setUserType('regular');
-            } else if (activity.promisesCreated < 30) {
-              setUserType('power');
-            } else {
-              setUserType('power');
-            }
-            
-            // Show onboarding only if not completed before
-            if (!activity.hasCompletedOnboarding) {
-              setTimeout(() => {
-                setShowOnboarding(true);
-                setHasCompletedOnboarding(false);
-              }, 1000);
-            }
-          }
-        }, 1000);
       }
     });
     return () => unsubscribe();
   }, [router]);
+
+  // Load user activity and trust score from Firestore
+  useEffect(() => {
+    if (!user) return;
+    
+    const loadUserActivity = async () => {
+      try {
+        // Load user activity from Firestore
+        const activityDoc = await getDoc(doc(db, 'userActivity', user.uid));
+        
+        if (activityDoc.exists()) {
+          const activity = activityDoc.data();
+          setTrustScore(activity.trustScore || 0);
+          setStreak(activity.streak || 0);
+          setHasCompletedOnboarding(activity.hasCompletedOnboarding || false);
+          
+          // Only show onboarding if not completed
+          if (!activity.hasCompletedOnboarding) {
+            setShowOnboarding(true);
+          }
+        } else {
+          // New user - create initial activity record
+          await setDoc(doc(db, 'userActivity', user.uid), {
+            firstVisit: new Date().toISOString(),
+            promisesCreated: 0,
+            trustScore: 0,
+            streak: 0,
+            hasCompletedOnboarding: false
+          });
+          
+          setShowOnboarding(true);
+        }
+      } catch (error) {
+        console.error("Error loading user activity:", error);
+        // Fallback to basic setup if Firestore fails
+        setTrustScore(0);
+        setStreak(0);
+        setShowOnboarding(true);
+      }
+    };
+    
+    loadUserActivity();
+  }, [user]);
 
   // Tree growth based on trust
   useEffect(() => {
@@ -378,21 +203,28 @@ export default function Dashboard() {
     setGrowthLevel(level);
   }, [trustScore]);
 
-  // Listen to promises
+  // Listen to user's promises only
   useEffect(() => {
     if (!user) return;
+    
     setIsLoading(true);
-    const q = query(collection(db, 'promises'));
+    
+    // Only get promises for the current user
+    const q = query(
+      collection(db, 'promises'),
+      where('ownerId', '==', user.uid)
+    );
+    
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const list = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         
-        // Convert all date fields to JavaScript Date objects
+        // Convert Firestore dates to JS dates
         const processedData = {
           ...data,
-          createdAt: convertFirestoreDate(data.createdAt),
-          deadline: convertFirestoreDate(data.deadline)
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : data.createdAt,
+          deadline: data.deadline?.toDate ? data.deadline.toDate() : data.deadline
         };
         
         list.push({ 
@@ -400,26 +232,26 @@ export default function Dashboard() {
           ...processedData
         });
       });
+      
       setPromises(list);
       setIsLoading(false);
       
-      // Update user activity with trust metrics
+      // Update user activity in Firestore
       if (user) {
-        const userActivity = localStorage.getItem(`userActivity_${user.uid}`);
-        if (userActivity) {
-          const activity = JSON.parse(userActivity);
-          activity.promisesCreated = list.length;
-          activity.trustScore = trustScore;
-          localStorage.setItem(`userActivity_${user.uid}`, JSON.stringify(activity));
-        }
+        updateDoc(doc(db, 'userActivity', user.uid), {
+          promisesCreated: list.length,
+          trustScore: trustScore,
+          streak: streak
+        }).catch(console.error);
       }
     }, (error) => {
       console.error("Error fetching promises:", error);
       setIsLoading(false);
       setHasError(true);
     });
+    
     return () => unsubscribe();
-  }, [user, trustScore]);
+  }, [user, trustScore, streak]);
 
   // Add tagged contact
   const handleAddContact = () => {
@@ -530,6 +362,9 @@ export default function Dashboard() {
     const impact = calculateTrustImpact('promise-completion');
     setTrustScore(prev => Math.min(100, prev + impact));
     setShowTrustRipple(true);
+    
+    // Update streak
+    setStreak(prev => prev + 1);
     
     // Show confetti for trust-building moments
     setShowConfetti(true);
@@ -667,7 +502,7 @@ export default function Dashboard() {
     setSelectedPromise(promise);
   };
 
-  // NEW: Delete promise functionality
+  // Delete promise functionality
   const handleDeletePromise = async (promise: any) => {
     if (!window.confirm("Are you sure you want to delete this promise? This cannot be undone.")) {
       return;
@@ -882,129 +717,22 @@ export default function Dashboard() {
     }
   };
 
-  // AI Chatbot Functions
-  const handleChatbotToggle = () => {
-    setShowChatbot(!showChatbot);
-    
-    if (!showChatbot) {
-      // Add welcome message when opening chatbot
-      setChatMessages([
-        {
-          text: "Hello! I'm your TrustNet AI assistant. How can I help you build trust today?",
-          sender: 'bot',
-          timestamp: new Date()
-        }
-      ]);
-    }
-  };
-
-  const handleChatInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChatInput(e.target.value);
-  };
-
-  const handleChatSend = () => {
-    if (!chatInput.trim()) return;
-    
-    // Add user message
-    const userMessage = {
-      text: chatInput,
-      sender: 'user',
-      timestamp: new Date()
-    };
-    
-    setChatMessages(prev => [...prev, userMessage]);
-    setChatInput('');
-    
-    // Process the message and generate a response
-    setTimeout(() => {
-      const response = generateBotResponse(chatInput);
-      setChatMessages(prev => [...prev, response]);
-    }, 500);
-  };
-
-  const generateBotResponse = (userInput: string) => {
-    // Check for promise-related questions
-    const isPromiseQuestion = /promise|promises|commitment|agreement|trust circle|accountability/i.test(userInput);
-    
-    // Check for specific FAQ matches
-    const faqMatch = TRUSTNET_FAQ.find(item => 
-      userInput.toLowerCase().includes(item.question.toLowerCase().split(' ')[0]) ||
-      userInput.toLowerCase().includes(item.question.toLowerCase().split(' ')[1])
-    );
-    
-    // Generate appropriate response
-    let responseText;
-    
-    if (faqMatch) {
-      responseText = faqMatch.answer;
-    } else if (isPromiseQuestion) {
-      // Special handling for promise questions
-      const specialistResponse = PROMISE_SPECIALIST_RESPONSES[
-        Math.floor(Math.random() * PROMISE_SPECIALIST_RESPONSES.length)
-      ];
-      
-      responseText = `${specialistResponse}\n\n${TRUSTNET_FAQ.find(f => f.category === 'promises')?.answer}`;
-    } else {
-      // Check if it's a greeting
-      const isGreeting = /hi|hello|hey|greetings/i.test(userInput);
-      
-      if (isGreeting) {
-        responseText = "Hello! I'm your TrustNet AI assistant. How can I help you build trust today?";
-      } else {
-        // Out of scope response
-        responseText = OUT_OF_SCOPE_RESPONSES[
-          Math.floor(Math.random() * OUT_OF_SCOPE_RESPONSES.length)
-        ];
-      }
-    }
-    
-    return {
-      text: responseText,
-      sender: 'bot',
-      timestamp: new Date()
-    };
-  };
-
-  // Onboarding Tour Functions
-  const handleOnboardingNext = () => {
-    if (onboardingStep < ONBOARDING_STEPS.length - 1) {
-      setOnboardingStep(prev => prev + 1);
-    } else {
-      completeOnboarding();
-    }
-  };
-
-  const handleOnboardingSkip = () => {
-    completeOnboarding();
-  };
-
-  const completeOnboarding = () => {
+  // Complete onboarding
+  const completeOnboarding = async () => {
     setShowOnboarding(false);
     setOnboardingStep(0);
     
-    // Mark onboarding as completed in localStorage
+    // Mark onboarding as completed in Firestore
     if (user) {
-      const userActivity = localStorage.getItem(`userActivity_${user.uid}`);
-      if (userActivity) {
-        const activity = JSON.parse(userActivity);
-        activity.hasCompletedOnboarding = true;
-        localStorage.setItem(`userActivity_${user.uid}`, JSON.stringify(activity));
+      try {
+        await updateDoc(doc(db, 'userActivity', user.uid), {
+          hasCompletedOnboarding: true
+        });
+        setHasCompletedOnboarding(true);
+      } catch (error) {
+        console.error("Error updating onboarding status:", error);
       }
     }
-    
-    setHasCompletedOnboarding(true);
-    
-    // Add welcome message to chatbot
-    setTimeout(() => {
-      setShowChatbot(true);
-      setChatMessages([
-        {
-          text: "Welcome to TrustNet! I'm here to help you build authentic trust through meaningful promises. Would you like to plant your first promise today?",
-          sender: 'bot',
-          timestamp: new Date()
-        }
-      ]);
-    }, 500);
   };
 
   // Onboarding Steps
@@ -1034,21 +762,6 @@ export default function Dashboard() {
       position: "top"
     }
   ];
-
-  useEffect(() => {
-    let timer;
-    if (showOnboarding && onboardingStep < ONBOARDING_STEPS.length) {
-      timer = setTimeout(() => {
-        if (onboardingStep < ONBOARDING_STEPS.length - 1) {
-          setOnboardingStep(prev => prev + 1);
-        } else {
-          completeOnboarding();
-        }
-      }, 5000); // 5 seconds per step
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showOnboarding, onboardingStep]);
 
   if (hasError) {
     return (
@@ -1207,10 +920,6 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
                 <span>✨</span>
-                <span>{chainReactions}</span>
-              </div>
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
-                <span>🌱</span>
                 <span>{streak}</span>
               </div>
             </div>
@@ -1409,50 +1118,52 @@ export default function Dashboard() {
           
           {/* Trust Circles List */}
           <div className="space-y-4">
-            {/* Sample Trust Circle */}
-            <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium text-gray-800 dark:text-gray-200">Morning Journalers</h3>
-                <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full text-xs">
-                  3/5 members
-                </span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Daily journaling accountability group</p>
-              <div className="flex gap-2 flex-wrap mb-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white text-xs">
-                  U
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center justify-center text-white text-xs">
-                  A
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-400 flex items-center justify-center text-white text-xs">
-                  B
-                </div>
-              </div>
-              <div className="flex justify-end">
+            {/* Trust Circles from Firestore */}
+            {promises.filter(p => p.trustCircleId).length === 0 ? (
+              <div className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                <span className="text-3xl mb-2">👥</span>
+                <h3 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-1">No Trust Circles Yet</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                  Create a small accountability group (3-5 people) for building trust together
+                </p>
                 <button
-                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-2 py-1 rounded text-sm hover:opacity-90 transition-opacity"
-                  onClick={() => alert('You can now share promises directly with this Trust Circle!')}
+                  onClick={() => setShowTrustCircleModal(true)}
+                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
                 >
-                  Share Promise
+                  Create Your First Circle
                 </button>
               </div>
-            </div>
-            
-            {/* Empty state for Trust Circles */}
-            <div className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-              <span className="text-3xl mb-2">👥</span>
-              <h3 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-1">No Trust Circles Yet</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
-                Create a small accountability group (3-5 people) for building trust together
-              </p>
-              <button
-                onClick={() => setShowTrustCircleModal(true)}
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-              >
-                Create Your First Circle
-              </button>
-            </div>
+            ) : (
+              promises.filter(p => p.trustCircleId).map((circle, index) => (
+                <div key={index} className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200">Trust Circle {index + 1}</h3>
+                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full text-xs">
+                      {circle.taggedContacts ? circle.taggedContacts.length + 1 : '3'}/5 members
+                    </span>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Daily accountability group</p>
+                  <div className="flex gap-2 flex-wrap mb-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white text-xs">
+                      U
+                    </div>
+                    {circle.taggedContacts && circle.taggedContacts.map((contact: any, i: number) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center justify-center text-white text-xs">
+                        {contact.value.charAt(0).toUpperCase()}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-end">
+                    <button
+                      className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-2 py-1 rounded text-sm hover:opacity-90 transition-opacity"
+                      onClick={() => alert('You can now share promises directly with this Trust Circle!')}
+                    >
+                      Share Promise
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
@@ -1514,16 +1225,6 @@ export default function Dashboard() {
                       </button>
                     </div>
                     
-                    {/* Emotional Tags */}
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs">
-                        🤝 {p.emotionalTone || 'Cooperative'}
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 text-xs">
-                        💪 Motivational
-                      </span>
-                    </div>
-                    
                     {/* Card Content */}
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{p.emoji}</span>
@@ -1578,13 +1279,6 @@ export default function Dashboard() {
                       >
                         ✕
                       </button>
-                    </div>
-                    
-                    {/* Emotional Tags */}
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      <span className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs">
-                        🤝 Cooperative
-                      </span>
                     </div>
                     
                     {/* Card Content */}
@@ -1698,10 +1392,12 @@ export default function Dashboard() {
             
             <div className="flex-1">
               <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">
-                You're building a solid foundation
+                {trustScore < 30 ? "Starting your trust journey" :
+                 trustScore < 60 ? "Building solid foundations" :
+                 trustScore < 85 ? "Strong trust relationships" : "Exceptional trustworthiness"}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                {"Your trust score has increased " + (trustScore - 84) + "% this month"}
+                {"Your trust score has increased " + (trustScore - 0) + "% this month"}
               </div>
             </div>
           </div>
@@ -1930,141 +1626,6 @@ export default function Dashboard() {
                 </div>
               ))}
           </div>
-        </section>
-
-        {/* Emotional Signals Zone - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>🧠</span> Emotional Signals
-          </h2>
-          
-          {/* Sentiment Timeline */}
-          <div className="relative h-40 mb-6">
-            <svg viewBox="0 0 600 160" className="w-full h-full">
-              {/* Timeline line */}
-              <line
-                x1="50"
-                y1="100"
-                x2="550"
-                y2="100"
-                stroke={darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}
-                strokeWidth="2"
-              />
-              
-              {/* Timeline markers */}
-              {promises.filter(p => p.status === 'aligned' || p.status === 'active' || p.status === 'drafting').slice(0, 5).map((p, index) => {
-                const position = 100 + (index * 100);
-                const date = p.createdAt ? convertFirestoreDate(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown';
-                
-                return (
-                  <g key={p.id}>
-                    {/* Vertical line */}
-                    <line
-                      x1={position}
-                      y1="100"
-                      x2={position}
-                      y2="70"
-                      stroke={p.status === 'drafting' ? '#FF6B6B' : p.status === 'active' ? '#FFD166' : '#4ECDC4'}
-                      strokeWidth="2"
-                    />
-                    
-                    {/* Marker dot */}
-                    <circle
-                      cx={position}
-                      cy="70"
-                      r="8"
-                      fill={p.status === 'drafting' ? '#FF6B6B' : p.status === 'active' ? '#FFD166' : '#4ECDC4'}
-                      stroke={darkMode ? '#2a2a2a' : 'white'}
-                      strokeWidth="2"
-                    />
-                    
-                    {/* Emoji */}
-                    <text
-                      x={position}
-                      y="50"
-                      fontSize="1.2rem"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                    >
-                      {p.status === 'drafting' ? '😟' : p.status === 'active' ? '😐' : '😊'}
-                    </text>
-                    
-                    {/* Date label */}
-                    <text
-                      x={position}
-                      y="120"
-                      fontSize="0.8rem"
-                      fill={darkMode ? '#aaa' : '#666'}
-                      textAnchor="middle"
-                    >
-                      {date}
-                    </text>
-                  </g>
-                );
-              })}
-              
-              {/* Sentiment trend line */}
-              <polyline
-                points={promises.filter(p => p.status === 'aligned' || p.status === 'active' || p.status === 'drafting').slice(0, 5).map((p, index) => {
-                  const y = p.status === 'drafting' ? 90 : p.status === 'active' ? 85 : 70;
-                  return `${100 + (index * 100)},${y}`;
-                }).join(' ')}
-                fill="none"
-                stroke="url(#sentimentGradient)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              
-              {/* Gradient definition */}
-              <defs>
-                <linearGradient id="sentimentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#FF6B6B" />
-                  <stop offset="50%" stopColor="#FFD166" />
-                  <stop offset="100%" stopColor="#4ECDC4" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-          
-          {/* Current Sentiment */}
-          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-purple-400 flex items-center justify-center text-white text-2xl">
-              🤝
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
-                Current Sentiment: {promises.some(p => p.status === 'drafting') ? 'Concerned' : promises.some(p => p.status === 'active') ? 'Neutral' : 'Optimistic'}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 text-sm">
-                Your agreements are {promises.some(p => p.status === 'drafting') ? 'showing some concerns that need addressing' : promises.some(p => p.status === 'active') ? 'progressing steadily' : 'showing strong alignment and mutual understanding'}
-              </p>
-            </div>
-          </div>
-          
-          {/* Sentiment Alert */}
-          {promises.some(p => p.status === 'drafting') && (
-            <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl text-red-500">⚠️</span>
-                <strong className="text-red-700 dark:text-red-200">Sentiment Alert</strong>
-              </div>
-              <p className="text-gray-800 dark:text-gray-200 mb-3">
-                {promises.filter(p => p.status === 'drafting')[0]?.title} agreement shows a dip in sentiment. Want to revisit this term together?
-              </p>
-              <div className="flex justify-end">
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleReviewAgreement(promises.filter(p => p.status === 'drafting')[0]);
-                  }}
-                  className="bg-gradient-to-r from-red-500 to-red-400 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
-                >
-                  Review Agreement
-                </button>
-              </div>
-            </div>
-          )}
         </section>
 
         {/* Progress Tracker Zone - Semantic Section Tag */}
@@ -2398,7 +1959,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Promise Detail Modal (AI Coach) */}
+      {/* Promise Detail Modal */}
       {selectedPromise && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[80vh] overflow-y-auto">
@@ -2417,50 +1978,9 @@ export default function Dashboard() {
               <h3 className="text-lg font-medium text-cyan-700 dark:text-cyan-300 flex items-center gap-2 mb-3">
                 <span>🤖</span> AI Coach Suggests:
               </h3>
-              <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-200">
-                {(() => {
-                  const title = selectedPromise.title.toLowerCase();
-                  const wisdomBanks = {
-                    journal: [
-                      "Write one sentence today. Momentum > perfection.",
-                      "Morning pages clear the mind. Try 7 minutes with coffee.",
-                      "Don't write what happened. Write how you felt.",
-                      "Skip a day? Forgive yourself. The next page is always open.",
-                      "Your journal is a mirror. What does it reflect?"
-                    ],
-                    mom: [
-                      "Call her not because you should, but because she's your first home.",
-                      "Ask her: &apos;What made you smile today?&apos; Listen. That's love.",
-                      "She doesn't need long calls. 90 seconds of &apos;I&apos;m thinking of you&apos; is enough.",
-                      "If you miss a week, say: &apos;I&apos;m back.&apos; No apology needed.",
-                      "One day, her voice will be a memory. Record it now."
-                    ],
-                    social: [
-                      "Scrolling is escape. What are you running from?",
-                      "Turn off notifications after 9 PM. Your mind deserves silence.",
-                      "Replace 10 mins of scrolling with 10 mins of stretching.",
-                      "Track your mood: Do you feel better after or before?",
-                      "You're not addicted. You're lonely. Reach out instead."
-                    ],
-                    default: [
-                      "Break your promise into tiny actions. Small steps win.",
-                      "Set a reminder at the same time every day. Consistency builds trust.",
-                      "Reflect weekly: What helped? What didn't?",
-                      "Share your journey — inspire others!",
-                      "Streak broken? Start again. Integrity is a practice, not perfection."
-                    ]
-                  };
-
-                  const bank = 
-                    title.includes('journal') ? wisdomBanks.journal :
-                    title.includes('call') || title.includes('mom') ? wisdomBanks.mom :
-                    title.includes('social') || title.includes('phone') ? wisdomBanks.social :
-                    wisdomBanks.default;
-
-                  const shuffled = [...bank].sort(() => 0.5 - Math.random());
-                  return shuffled.slice(0, 3).map((tip, i) => <li key={i}>{tip}</li>);
-                })()}
-              </ul>
+              <p className="text-gray-700 dark:text-gray-200">
+                No AI coach suggestions available in production mode. This feature will be added in a future update.
+              </p>
             </div>
             <button
               onClick={() => alert("🛠️ Support Ticket: Our team will help you within 24 hours.")}
@@ -2599,96 +2119,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* AI Support Chatbot */}
-      <div ref={chatbotRef} className="fixed bottom-6 right-6 z-40">
-        {/* Chatbot Button */}
-        <button
-          onClick={handleChatbotToggle}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-          aria-label="Open TrustNet AI Assistant"
-        >
-          <span className="text-2xl">🤖</span>
-        </button>
-        
-        {/* Chatbot Interface */}
-        {showChatbot && (
-          <div className="absolute bottom-16 right-0 w-96 h-[500px] bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center text-white">
-                  🤖
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-800 dark:text-gray-200">TrustNet AI Assistant</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Always here to help</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowChatbot(false)}
-                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                aria-label="Close chat"
-              >
-                <span className="text-xl">✕</span>
-              </button>
-            </div>
-            
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {chatMessages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                      message.sender === 'user'
-                        ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-br-none'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap">{message.text}</p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Input */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={handleChatInput}
-                  onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
-                  placeholder="Ask about TrustNet, promises, or how to build trust..."
-                  className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:bg-gray-700 dark:text-white"
-                />
-                <button
-                  onClick={handleChatSend}
-                  className="w-12 h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-white flex items-center justify-center hover:opacity-90 transition-opacity"
-                  aria-label="Send message"
-                >
-                  <span className="text-xl">➤</span>
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Tip: Ask about &quot;promises&quot;, &quot;Trust Circles&quot;, or &quot;how to improve my Trust Score&quot;
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Onboarding Tour */}
       {showOnboarding && (
         <div 
           ref={onboardingRef}
           className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
-          onClick={handleOnboardingSkip}
+          onClick={completeOnboarding}
         >
           <div 
             className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl relative"
@@ -2696,7 +2132,7 @@ export default function Dashboard() {
           >
             <div className="absolute top-4 right-4">
               <button
-                onClick={handleOnboardingSkip}
+                onClick={completeOnboarding}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <span className="text-xl">✕</span>
@@ -2737,16 +2173,16 @@ export default function Dashboard() {
             
             <div className="flex justify-between">
               <button
-                onClick={handleOnboardingSkip}
+                onClick={completeOnboarding}
                 className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               >
                 Skip Tour
               </button>
               <button
-                onClick={handleOnboardingNext}
+                onClick={completeOnboarding}
                 className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
               >
-                {onboardingStep < ONBOARDING_STEPS.length - 1 ? 'Next' : 'Get Started'}
+                Get Started
               </button>
             </div>
             
