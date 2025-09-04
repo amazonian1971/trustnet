@@ -1,5 +1,16 @@
 {
   "compilerOptions": {
+	"noEmit": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "useUnknownInCatchVariables": false
     "target": "es2017",
     "lib": ["dom", "dom.iterable", "es6"],
     "allowJs": true,

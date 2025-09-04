@@ -1,57 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // Redirect to /auth if not logged in
+    // (We'll handle auth state properly in the next step)
+    const checkAuth = () => {
+      const user = localStorage.getItem('user');
       if (!user) {
         router.push('/auth');
-      } else {
-        setIsLoading(false);
       }
-    });
+    };
     
-    return () => unsubscribe();
+    checkAuth();
+    
+    // Set up auth state listener
+    const unsubscribe = () => {
+      // This would be where you'd set up Firebase auth state listener
+      // For now, we'll just check localStorage periodically
+      const interval = setInterval(checkAuth, 1000);
+      return () => clearInterval(interval);
+    };
+    
+    return unsubscribe();
   }, [router]);
 
-  if (isLoading) {
-    return (
-      <div style={{
-        fontFamily: 'Arial, sans-serif',
-        padding: '20px',
-        textAlign: 'center',
-        backgroundColor: '#f0f7f4',
-        minHeight: '100vh',
-        color: '#1a3d30',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          fontSize: '48px',
-          animation: 'spin 1s linear infinite'
-        }}>🌿</div>
-        <p style={{ 
-          marginTop: '20px', 
-          color: '#2e8b57',
-          fontSize: '1.2rem'
-        }}>
-          Building trust, one promise at a time...
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <main style={{
+    <div style={{
       fontFamily: 'Arial, sans-serif',
       padding: '20px',
       textAlign: 'center',
@@ -76,7 +55,7 @@ export default function Home() {
         backgroundClip: 'text',
         color: 'transparent'
       }}>
-        TrustNet - 信木-Xìn Mù 
+       🌿 TrustNet - 信木-Xìn Mù 🌿
       </h1>
 
       <p style={{
@@ -85,7 +64,7 @@ export default function Home() {
         margin: '20px 0 30px',
         fontSize: '1.3rem'
       }}>
-        "A promise made is a seed planted."
+        &quot;A promise made is a seed planted.&quot;
       </p>
 
       <button
@@ -99,11 +78,8 @@ export default function Home() {
           fontSize: '1.1rem',
           fontWeight: 'bold',
           cursor: 'pointer',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          transition: 'background-color 0.3s ease'
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}
-        onMouseOver={(e) => e.target.style.backgroundColor = '#1557b0'}
-        onMouseOut={(e) => e.target.style.backgroundColor = '#1a73e8'}
       >
         🌱 Start Your Promise 🌱
       </button>
@@ -113,13 +89,6 @@ export default function Home() {
       <p style={{ fontSize: '0.9rem', color: '#666' }}>
         Powered by Qwen • A promise kept is a tree grown.
       </p>
-      
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-    </main>
+    </div>
   );
 }

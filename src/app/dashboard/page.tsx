@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, query, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Helper function to convert Firestore date objects to JavaScript Date objects
-const convertFirestoreDate = (date) => {
+const convertFirestoreDate = (date: any) => {
   if (!date) return null;
   if (date instanceof Date) return date;
   if (date.toDate && typeof date.toDate === 'function') return date.toDate();
@@ -18,15 +18,16 @@ const convertFirestoreDate = (date) => {
 };
 
 // Trust-focused helper functions
-const calculateTrustImpact = (interactionType) => {
-  const impacts = {
+const calculateTrustImpact = (interactionType: string) => {
+  const impacts: Record<string, number> = {
     'promise-completion': 3,
     'support-reaction': 2,
     'promise-sharing': 2,
     'nudge-sent': 1,
     'clarification': 1,
     'confirmation': 2,
-    'circle-creation': 2
+    'circle-creation': 2,
+    'deletion': -1
   };
   return impacts[interactionType] || 1;
 };
@@ -184,15 +185,15 @@ const PROMISE_SPECIALIST_RESPONSES = [
 ];
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [streak] = useState(7);
   const [growthLevel, setGrowthLevel] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState('');
   const [emoji, setEmoji] = useState('🌱');
-  const [promises, setPromises] = useState([]);
-  const [selectedPromise, setSelectedPromise] = useState(null);
+  const [promises, setPromises] = useState<any[]>([]);
+  const [selectedPromise, setSelectedPromise] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('active');
   const [activeFeedTab, setActiveFeedTab] = useState('all');
   const [feedSort, setFeedSort] = useState('recent');
@@ -200,10 +201,14 @@ export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showLaunchSequence, setShowLaunchSequence] = useState(false);
-  const [newPromise, setNewPromise] = useState(null);
-  const [taggedContacts, setTaggedContacts] = useState([]);
+  const [newPromise, setNewPromise] = useState<any>(null);
+  const [taggedContacts, setTaggedContacts] = useState<any[]>([]);
   const [contactInput, setContactInput] = useState('');
-  const [showContactModal, setShowContactModal] = useState({ 
+  const [showContactModal, setShowContactModal] = useState<{ 
+    visible: boolean; 
+    type: string;
+    forCircle: boolean;
+  }>({ 
     visible: false, 
     type: 'phone',
     forCircle: false
@@ -214,18 +219,18 @@ export default function Dashboard() {
   const [showTrustCircleModal, setShowTrustCircleModal] = useState(false);
   const [circleName, setCircleName] = useState('');
   const [circleDescription, setCircleDescription] = useState('');
-  const [circleMembers, setCircleMembers] = useState([]);
+  const [circleMembers, setCircleMembers] = useState<any[]>([]);
   const [showChatbot, setShowChatbot] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const router = useRouter();
-  const promiseCardRef = useRef(null);
-  const trustBarRef = useRef(null);
-  const chatbotRef = useRef(null);
-  const onboardingRef = useRef(null);
+  const promiseCardRef = useRef<any>(null);
+  const trustBarRef = useRef<any>(null);
+  const chatbotRef = useRef<any>(null);
+  const onboardingRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -238,15 +243,15 @@ export default function Dashboard() {
 
   // Helper function to get filtered and sorted posts
   const getFilteredAndSortedPosts = () => {
-    let filteredPosts = [];
+    let filteredPosts: any[] = [];
     
     if (activeFeedTab === 'all') {
       filteredPosts = [...promises];
     } else if (activeFeedTab === 'friends') {
       filteredPosts = promises.filter(p => 
-        p.taggedContacts && p.taggedContacts.some(c => 
-          c.value === user.email || 
-          (user.phoneNumber && c.value.includes(user.phoneNumber))
+        p.taggedContacts && p.taggedContacts.some((c: any) => 
+          c.value === user?.email || 
+          (user?.phoneNumber && c.value.includes(user.phoneNumber))
         )
       );
     } else if (activeFeedTab === 'trust-circles') {
@@ -271,7 +276,7 @@ export default function Dashboard() {
   };
 
   // Glassmorphism effect helper
-  const glassEffect = (dark) => ({
+  const glassEffect = (dark: boolean) => ({
     background: dark 
       ? 'rgba(42, 0, 102, 0.3)' 
       : 'rgba(255, 255, 255, 0.7)',
@@ -283,7 +288,7 @@ export default function Dashboard() {
   });
   
   // Trust-focused tag button style
-  const trustTagButtonStyle = (dark) => ({
+  const trustTagButtonStyle = (dark: boolean) => ({
     padding: '6px 12px',
     borderRadius: '20px',
     background: dark ? '#333' : '#f0f0f0',
@@ -414,7 +419,7 @@ export default function Dashboard() {
       setHasError(true);
     });
     return () => unsubscribe();
-  }, [user]);
+  }, [user, trustScore]);
 
   // Add tagged contact
   const handleAddContact = () => {
@@ -466,17 +471,17 @@ export default function Dashboard() {
   };
 
   // Remove tagged contact
-  const removeTaggedContact = (index) => {
+  const removeTaggedContact = (index: number) => {
     setTaggedContacts(prev => prev.filter((_, i) => i !== index));
   };
 
   // Remove circle member
-  const removeCircleMember = (index) => {
+  const removeCircleMember = (index: number) => {
     setCircleMembers(prev => prev.filter((_, i) => i !== index));
   };
 
   // WhatsApp deep link
-  const sendWhatsApp = (phone) => {
+  const sendWhatsApp = (phone: string) => {
     // Clean phone number and ensure it has country code
     let cleanedPhone = phone.replace(/\D/g, '');
     
@@ -496,7 +501,7 @@ export default function Dashboard() {
   };
 
   // SMS deep link
-  const sendSMS = (phone) => {
+  const sendSMS = (phone: string) => {
     // Clean phone number
     let cleanedPhone = phone.replace(/\D/g, '');
     
@@ -510,14 +515,14 @@ export default function Dashboard() {
   };
 
   // Email deep link
-  const sendEmail = (email) => {
+  const sendEmail = (email: string) => {
     const subject = encodeURIComponent("Join me in my TrustNet promise");
     const body = encodeURIComponent(`Hi,\n\nI've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?\n\nCheck it out: [TrustNet Link]`);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   // Start cinematic launch sequence
-  const startLaunchSequence = (promise) => {
+  const startLaunchSequence = (promise: any) => {
     setNewPromise(promise);
     setShowLaunchSequence(true);
     
@@ -607,7 +612,7 @@ export default function Dashboard() {
   };
 
   // Handle button actions for promises
-  const handleClarify = async (promise) => {
+  const handleClarify = async (promise: any) => {
     try {
       await updateDoc(doc(db, 'promises', promise.id), {
         status: 'drafting',
@@ -625,7 +630,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleRemindLater = async (promise) => {
+  const handleRemindLater = async (promise: any) => {
     try {
       await updateDoc(doc(db, 'promises', promise.id), {
         progress: `Day ${Math.floor(Math.random() * 5) + 3} (Reminder set)`
@@ -636,7 +641,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleConfirm = async (promise) => {
+  const handleConfirm = async (promise: any) => {
     try {
       await updateDoc(doc(db, 'promises', promise.id), {
         status: 'aligned',
@@ -658,11 +663,36 @@ export default function Dashboard() {
     }
   };
 
-  const handleAddNotes = (promise) => {
+  const handleAddNotes = (promise: any) => {
     setSelectedPromise(promise);
   };
 
-  const handleSendNudge = async (promise) => {
+  // NEW: Delete promise functionality
+  const handleDeletePromise = async (promise: any) => {
+    if (!window.confirm("Are you sure you want to delete this promise? This cannot be undone.")) {
+      return;
+    }
+    
+    try {
+      await deleteDoc(doc(db, 'promises', promise.id));
+      
+      // Impact trust score for deletion
+      const impact = calculateTrustImpact('deletion');
+      setTrustScore(prev => Math.max(0, prev + impact));
+      setShowTrustRipple(true);
+      
+      alert('Promise deleted successfully!');
+      
+      // If it was the selected promise, clear the selection
+      if (selectedPromise && selectedPromise.id === promise.id) {
+        setSelectedPromise(null);
+      }
+    } catch (error) {
+      alert('Error deleting promise: ' + error.message);
+    }
+  };
+
+  const handleSendNudge = async (promise: any) => {
     try {
       // Enhanced validation
       if (!promise || !promise.id) {
@@ -732,7 +762,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleSkipNudge = async (promise) => {
+  const handleSkipNudge = async (promise: any) => {
     try {
       // Enhanced validation
       if (!promise || !promise.id) {
@@ -764,12 +794,12 @@ export default function Dashboard() {
     }
   };
 
-  const handleReviewAgreement = (promise) => {
+  const handleReviewAgreement = (promise: any) => {
     setSelectedPromise(promise);
   };
   
   // Handle trust score updates from social components
-  const handleTrustScoreUpdate = (interactionType) => {
+  const handleTrustScoreUpdate = (interactionType: string) => {
     const points = calculateTrustImpact(interactionType);
     setTrustScore(prev => Math.min(100, prev + points));
     setShowTrustRipple(true);
@@ -868,7 +898,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleChatInput = (e) => {
+  const handleChatInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setChatInput(e.target.value);
   };
 
@@ -892,7 +922,7 @@ export default function Dashboard() {
     }, 500);
   };
 
-  const generateBotResponse = (userInput) => {
+  const generateBotResponse = (userInput: string) => {
     // Check for promise-related questions
     const isPromiseQuestion = /promise|promises|commitment|agreement|trust circle|accountability/i.test(userInput);
     
@@ -913,7 +943,7 @@ export default function Dashboard() {
         Math.floor(Math.random() * PROMISE_SPECIALIST_RESPONSES.length)
       ];
       
-      responseText = `${specialistResponse}\n\n${TRUSTNET_FAQ.find(f => f.category === 'promises').answer}`;
+      responseText = `${specialistResponse}\n\n${TRUSTNET_FAQ.find(f => f.category === 'promises')?.answer}`;
     } else {
       // Check if it's a greeting
       const isGreeting = /hi|hello|hey|greetings/i.test(userInput);
@@ -953,11 +983,13 @@ export default function Dashboard() {
     setOnboardingStep(0);
     
     // Mark onboarding as completed in localStorage
-    const userActivity = localStorage.getItem(`userActivity_${user.uid}`);
-    if (userActivity) {
-      const activity = JSON.parse(userActivity);
-      activity.hasCompletedOnboarding = true;
-      localStorage.setItem(`userActivity_${user.uid}`, JSON.stringify(activity));
+    if (user) {
+      const userActivity = localStorage.getItem(`userActivity_${user.uid}`);
+      if (userActivity) {
+        const activity = JSON.parse(userActivity);
+        activity.hasCompletedOnboarding = true;
+        localStorage.setItem(`userActivity_${user.uid}`, JSON.stringify(activity));
+      }
     }
     
     setHasCompletedOnboarding(true);
@@ -1212,9 +1244,9 @@ export default function Dashboard() {
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold flex items-center gap-2">
-              <span>🧩</span> Daily Promise Builder
+              <span>🧩</span> Daily Builder
             </h2>
-            <div className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm">
+            <div className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm">
               Day {((new Date().getDate() % 3) + 1)}
             </div>
           </div>
@@ -1238,7 +1270,7 @@ export default function Dashboard() {
             onClick={() => setShowModal(true)}
             className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
           >
-            Start Today's Promise 
+            Start Today's Builder
           </button>
         </section>
 
@@ -1461,13 +1493,25 @@ export default function Dashboard() {
                     ref={p.id === newPromise?.id ? promiseCardRef : null}
                     className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1"
                   >
-                    {/* Status Badge */}
-                    <div className={`absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium ${
-                      p.status === 'drafting' 
-                        ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                    }`}>
-                      {p.status === 'drafting' ? '⚠️ Due Soon' : '🟢 Active'}
+                    {/* Status Badge and Delete Button */}
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        p.status === 'drafting' 
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                      }`}>
+                        {p.status === 'drafting' ? '⚠️ Due Soon' : '🟢 Active'}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePromise(p);
+                        }}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Delete promise"
+                      >
+                        ✕
+                      </button>
                     </div>
                     
                     {/* Emotional Tags */}
@@ -1519,9 +1563,21 @@ export default function Dashboard() {
                     key={p.id}
                     className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md"
                   >
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
-                      ✅ Completed
+                    {/* Status Badge and Delete Button */}
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                        ✅ Completed
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePromise(p);
+                        }}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Delete promise"
+                      >
+                        ✕
+                      </button>
                     </div>
                     
                     {/* Emotional Tags */}
@@ -1562,9 +1618,21 @@ export default function Dashboard() {
                     key={p.id}
                     className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70"
                   >
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                      📁 Archived
+                    {/* Status Badge and Delete Button */}
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        📁 Archived
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePromise(p);
+                        }}
+                        className="text-gray-500 hover:text-red-500"
+                        title="Delete promise"
+                      >
+                        ✕
+                      </button>
                     </div>
                     
                     {/* Card Content */}
@@ -1633,7 +1701,7 @@ export default function Dashboard() {
                 You're building a solid foundation
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                "Your trust score has increased {trustScore - 84}% this month"
+                {"Your trust score has increased " + (trustScore - 84) + "% this month"}
               </div>
             </div>
           </div>
@@ -1668,13 +1736,13 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Promise's Zone - Semantic Section Tag */}
+        {/* Active Agreements Zone - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>📄</span> Active Promise's
+            <span>📄</span> Active Agreements
           </h2>
           
-          {/* Promise Timeline */}
+          {/* Agreement Timeline */}
           <div className="relative pl-8 ml-3">
             {/* Timeline line */}
             <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-600 z-0"></div>
@@ -1726,13 +1794,13 @@ export default function Dashboard() {
             ))}
           </div>
           
-          {/* Add Promise Button */}
+          {/* Add Agreement Button */}
           <div className="text-center mt-4">
             <button 
               onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              <span>+</span> Add Promise
+              <span>+</span> Add Agreement
             </button>
           </div>
         </section>
@@ -2089,7 +2157,7 @@ export default function Dashboard() {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert('✅ Milestone completed! Your Promise is now fully aligned.');
+                      alert('✅ Milestone completed! Your agreement is now fully aligned.');
                       setTrustScore(prev => Math.min(100, prev + 1));
                       setShowTrustRipple(true);
                     }}
@@ -2105,8 +2173,8 @@ export default function Dashboard() {
 
         {/* Footer - Semantic Footer Tag */}
         <footer className="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm" role="contentinfo">
-          <p> 🌿 "A promise made is a seed planted." 🌿 </p>
-          <p>Powered by @TrustNet all rights reserved • The first social platform where trust is the currency</p>
+          <p>&quot;A promise made is a seed planted.&quot;</p>
+          <p>Powered by TrustNet • The first social platform where trust is the currency</p>
         </footer>
       </div>
 
@@ -2236,7 +2304,7 @@ export default function Dashboard() {
               placeholder="Brief description of your circle's purpose"
               value={circleDescription}
               onChange={(e) => setCircleDescription(e.target.value)}
-              rows="3"
+              rows={3}
               className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white resize-none"
             />
             
@@ -2362,9 +2430,9 @@ export default function Dashboard() {
                     ],
                     mom: [
                       "Call her not because you should, but because she's your first home.",
-                      "Ask her: 'What made you smile today?' Listen. That's love.",
-                      "She doesn't need long calls. 90 seconds of 'I'm thinking of you' is enough.",
-                      "If you miss a week, say: 'I'm back.' No apology needed.",
+                      "Ask her: &apos;What made you smile today?&apos; Listen. That's love.",
+                      "She doesn't need long calls. 90 seconds of &apos;I&apos;m thinking of you&apos; is enough.",
+                      "If you miss a week, say: &apos;I&apos;m back.&apos; No apology needed.",
                       "One day, her voice will be a memory. Record it now."
                     ],
                     social: [
@@ -2608,7 +2676,7 @@ export default function Dashboard() {
                 </button>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Tip: Ask about "promises", "Trust Circles", or "how to improve my Trust Score"
+                Tip: Ask about &quot;promises&quot;, &quot;Trust Circles&quot;, or &quot;how to improve my Trust Score&quot;
               </p>
             </div>
           </div>

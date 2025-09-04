@@ -1,3 +1,27 @@
+// Add this interface at the very top of the file
+interface PromiseType {
+  id: string;
+  title: string;
+  emoji: string;
+  deadline: Date | string | null;
+  status: string;
+  progress: string;
+}
+
+interface UserType {
+  uid: string;
+  displayName?: string;
+  email?: string;
+  phoneNumber?: string;
+}
+
+interface PromiseSharingProps {
+  promise: PromiseType;
+  user: UserType;
+  onShareComplete: () => void;
+  onTrustScoreUpdate: (interactionType: string) => void;
+}
+
 'use client'
 
 import { useState } from 'react';
@@ -24,7 +48,7 @@ const VISIBILITY_OPTIONS = [
   }
 ];
 
-export default function PromiseSharing({ promise, user, onShareComplete, onTrustScoreUpdate }) {
+export default function PromiseSharing({ promise, user, onShareComplete, onTrustScoreUpdate }: PromiseSharingProps) {
   const [visibility, setVisibility] = useState('circle');
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
