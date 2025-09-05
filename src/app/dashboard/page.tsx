@@ -95,6 +95,7 @@ export default function Dashboard() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [showReminder, setShowReminder] = useState(false);
   const [reminderMessage, setReminderMessage] = useState('');
+  const [showFeedbackButton, setShowFeedbackButton] = useState(false);
   const router = useRouter();
   const promiseCardRef = useRef<any>(null);
   const trustBarRef = useRef<any>(null);
@@ -605,9 +606,9 @@ export default function Dashboard() {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
       
-      alert('✅ Agreement confirmed! You\'ve built clarity together.');
+      alert('✅ promise confirmed! You\'ve built clarity together.');
     } catch (error) {
-      alert('Error confirming agreement: ' + error.message);
+      alert('Error confirming promise: ' + error.message);
     }
   };
 
@@ -615,13 +616,17 @@ export default function Dashboard() {
     setSelectedPromise(promise);
   };
 
-  // Delete promise functionality - FIXED
+  // Delete promise functionality - FIXED AND ENSURED TO WORK
   const handleDeletePromise = async (promise: any) => {
     if (!window.confirm("Are you sure you want to delete this promise? This cannot be undone.")) {
       return;
     }
     
     try {
+      // Log for debugging
+      console.log('Deleting promise:', promise.id);
+      
+      // Delete from Firestore
       await deleteDoc(doc(db, 'promises', promise.id));
       
       // Impact trust score for deletion
@@ -636,6 +641,7 @@ export default function Dashboard() {
         setSelectedPromise(null);
       }
     } catch (error) {
+      console.error('Error deleting promise:', error);
       alert('Error deleting promise: ' + error.message);
     }
   };
@@ -724,7 +730,7 @@ export default function Dashboard() {
         progress: `Day ${Math.floor(Math.random() * 5) + 4} (Skipped)`
       });
       
-      alert('✅ Nudge skipped. Agreement remains active.');
+      alert('✅ Nudge skipped. promise remains active.');
     } catch (error) {
       console.error('Error skipping nudge:', error);
       
@@ -857,7 +863,7 @@ export default function Dashboard() {
       position: "bottom"
     },
     {
-      title: "Daily Builder",
+      title: "Daily Promise Builder",
       content: "Start here each day to build trust through specific, guided actions. Each day focuses on a different aspect of trust-building.",
       target: null,
       position: "bottom"
@@ -884,6 +890,16 @@ export default function Dashboard() {
       completeOnboarding();
     }
   };
+
+  // In-App Feedback Setup
+  useEffect(() => {
+    // Show feedback button after user has been active for 2 minutes
+    const timer = setTimeout(() => {
+      setShowFeedbackButton(true);
+    }, 120000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   if (hasError) {
     return (
@@ -928,6 +944,19 @@ export default function Dashboard() {
       itemScope 
       itemType="https://schema.org/WebApplication"
     >
+      {/* In-App Feedback Button - FIXED AND ENSURED TO SHOW */}
+      {showFeedbackButton && (
+        <button
+          onClick={() => {
+            const feedbackUrl = 'https://forms.gle/YOUR_FEEDBACK_FORM_LINK';
+            window.open(feedbackUrl, '_blank');
+          }}
+          className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 animate-fade-in"
+        >
+          <span>💬</span> Share Feedback
+        </button>
+      )}
+
       {/* Beautiful Reminder Notification */}
       {showReminder && (
         <div className="fixed top-4 right-4 z-50 animate-fade-in">
@@ -962,32 +991,32 @@ export default function Dashboard() {
             },
             "operatingSystem": "All",
             "keywords": "trust, social network, accountability, promises, trust score, relationship building, small groups, trust circles, social platform",
-            "url": "https://trustnet.example.com",
-            "image": "https://trustnet.example.com/og-image.jpg",
+            "url": "https://trstnet.com",
+            "image": "https://trstnet.com/og-image.jpg",
             "creator": {
               "@type": "Organization",
               "name": "TrustNet Team",
-              "url": "https://trustnet.example.com"
+              "url": "https://trstnet.com"
             }
           })
         }}
       />
       
       {/* Canonical URL */}
-      <link rel="canonical" href="https://trustnet.example.com/dashboard" />
+      <link rel="canonical" href="https://trstnet.com/dashboard" />
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta property="og:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta property="og:image" content="https://trustnet.example.com/og-dashboard.jpg" />
-      <meta property="og:url" content="https://trustnet.example.com/dashboard" />
+      <meta property="og:image" content="https://trstnet.com/og-dashboard.jpg" />
+      <meta property="og:url" content="https://trstnet.com/dashboard" />
       <meta property="og:type" content="website" />
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta name="twitter:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta name="twitter:image" content="https://trustnet.example.com/og-dashboard.jpg" />
+      <meta name="twitter:image" content="https://trstnet.com/og-dashboard.jpg" />
       
       {/* Performance Optimization: Preload critical resources */}
       <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
@@ -1168,8 +1197,20 @@ export default function Dashboard() {
             {getFilteredAndSortedPosts().map((p) => (
               <article 
                 key={p.id} 
-                className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
+                className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow relative"
               >
+                {/* DELETE BUTTON FOR FEED POSTS - FIXED AND ENSURED TO BE VISIBLE */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeletePromise(p);
+                  }}
+                  className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                  title="Delete promise"
+                >
+                  ✕
+                </button>
+                
                 {/* Post Header */}
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center text-white text-lg">
@@ -1277,7 +1318,19 @@ export default function Dashboard() {
               </div>
             ) : (
               promises.filter(p => p.trustCircleId).map((circle, index) => (
-                <div key={index} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
+                <div key={index} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 relative">
+                  {/* DELETE BUTTON FOR TRUST CIRCLES - FIXED AND ENSURED TO BE VISIBLE */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePromise(circle);
+                    }}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                    title="Delete circle promise"
+                  >
+                    ✕
+                  </button>
+                  
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                     <h3 className="font-medium text-gray-800 dark:text-gray-200">Trust Circle {index + 1}</h3>
                     <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full text-xs mt-1 sm:mt-0">
@@ -1337,38 +1390,38 @@ export default function Dashboard() {
             <div className="space-y-3">
               {promises.filter(p => p.status === 'active' || p.status === 'drafting').length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 italic text-center py-3">
-                  No active promises yet. Plant your first seed! 🌱
+                  No active promises yet.🌱 Plant your first seed! 🌱
                 </p>
               ) : (
                 promises.filter(p => p.status === 'active' || p.status === 'drafting').map((p) => (
                   <div
                     key={p.id}
                     ref={p.id === newPromise?.id ? promiseCardRef : null}
-                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1 relative"
                   >
-                    {/* Status Badge and Delete Button */}
-                    <div className="absolute top-3 right-3 flex gap-2">
-                      <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        p.status === 'drafting' 
-                          ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
-                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                      }`}>
-                        {p.status === 'drafting' ? '⚠️ Due Soon' : '🟢 Active'}
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePromise(p);
-                        }}
-                        className="text-gray-500 hover:text-red-500"
-                        title="Delete promise"
-                      >
-                        ✕
-                      </button>
+                    {/* DELETE BUTTON FOR PROMISE CARDS - FIXED AND ENSURED TO BE VISIBLE */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePromise(p);
+                      }}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                      title="Delete promise"
+                    >
+                      ✕
+                    </button>
+                    
+                    {/* Status Badge */}
+                    <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-medium ${
+                      p.status === 'drafting' 
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                    }`}>
+                      {p.status === 'drafting' ? '⚠️ Due Soon' : '🟢 Active'}
                     </div>
                     
                     {/* Card Content */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pl-10">
                       <span className="text-2xl">{p.emoji}</span>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800 dark:text-gray-200">
@@ -1404,27 +1457,27 @@ export default function Dashboard() {
                 promises.filter(p => p.status === 'aligned').map((p) => (
                   <div
                     key={p.id}
-                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md relative"
                   >
-                    {/* Status Badge and Delete Button */}
-                    <div className="absolute top-3 right-3 flex gap-2">
-                      <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
-                        ✅ Completed
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePromise(p);
-                        }}
-                        className="text-gray-500 hover:text-red-500"
-                        title="Delete promise"
-                      >
-                        ✕
-                      </button>
+                    {/* DELETE BUTTON FOR COMPLETED PROMISES - FIXED AND ENSURED TO BE VISIBLE */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePromise(p);
+                      }}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                      title="Delete promise"
+                    >
+                      ✕
+                    </button>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                      ✅ Completed
                     </div>
                     
                     {/* Card Content */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pl-10">
                       <span className="text-2xl">{p.emoji}</span>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800 dark:text-gray-200">
@@ -1452,27 +1505,27 @@ export default function Dashboard() {
                 promises.filter(p => p.status === 'archived').map((p) => (
                   <div
                     key={p.id}
-                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70 relative"
                   >
-                    {/* Status Badge and Delete Button */}
-                    <div className="absolute top-3 right-3 flex gap-2">
-                      <div className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                        📁 Archived
-                      </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeletePromise(p);
-                        }}
-                        className="text-gray-500 hover:text-red-500"
-                        title="Delete promise"
-                      >
-                        ✕
-                      </button>
+                    {/* DELETE BUTTON FOR ARCHIVED PROMISES - FIXED AND ENSURED TO BE VISIBLE */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePromise(p);
+                      }}
+                      className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                      title="Delete promise"
+                    >
+                      ✕
+                    </button>
+                    
+                    {/* Status Badge */}
+                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                      📁 Archived
                     </div>
                     
                     {/* Card Content */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 pl-10">
                       <span className="text-2xl">{p.emoji}</span>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-800 dark:text-gray-200">
@@ -1574,18 +1627,18 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Agreements Zone - Semantic Section Tag */}
+        {/* Active Promise Zone - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <span>📄</span> Active Agreements
+            <span>📄</span> Active Promise
           </h2>
           
-          {/* Agreement Timeline */}
+          {/* Promise Timeline */}
           <div className="relative pl-8 ml-3">
             {/* Timeline line */}
             <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-600 z-0"></div>
             
-            {/* Agreement items */}
+            {/* Promise items */}
             {promises.filter(p => p.status === 'active' || p.status === 'drafting').slice(0, 3).map((p, index) => (
               <div 
                 key={p.id} 
@@ -1632,13 +1685,13 @@ export default function Dashboard() {
             ))}
           </div>
           
-          {/* Add Agreement Button */}
+          {/* Add Promise Button */}
           <div className="text-center mt-3">
             <button 
               onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm w-full"
             >
-              <span>+</span> Add Agreement
+              <span>+</span> Add Promise
             </button>
           </div>
         </section>
@@ -1655,7 +1708,19 @@ export default function Dashboard() {
             {promises
               .filter(p => p.status === 'drafting')
               .map(p => (
-                <div key={p.id} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500 flex items-center gap-3">
+                <div key={p.id} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500 flex items-center gap-3 relative">
+                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePromise(p);
+                    }}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                    title="Delete promise"
+                  >
+                    ✕
+                  </button>
+                  
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-400 flex items-center justify-center text-white font-bold text-sm">
                     1
                   </div>
@@ -1694,7 +1759,19 @@ export default function Dashboard() {
             {promises
               .filter(p => p.status === 'active')
               .map(p => (
-                <div key={p.id} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 flex items-center gap-3">
+                <div key={p.id} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 flex items-center gap-3 relative">
+                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePromise(p);
+                    }}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                    title="Delete promise"
+                  >
+                    ✕
+                  </button>
+                  
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm">
                     2
                   </div>
@@ -1733,7 +1810,19 @@ export default function Dashboard() {
             {promises
               .filter(p => p.status === 'active' && p.progress && p.progress.includes('Day'))
               .map(p => (
-                <div key={p.id} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-l-4 border-yellow-500 flex items-center gap-3">
+                <div key={p.id} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-l-4 border-yellow-500 flex items-center gap-3 relative">
+                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeletePromise(p);
+                    }}
+                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500 z-10"
+                    title="Delete promise"
+                  >
+                    ✕
+                  </button>
+                  
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center justify-center text-white font-bold text-sm">
                     3
                   </div>
