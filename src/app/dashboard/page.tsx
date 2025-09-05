@@ -32,6 +32,27 @@ const calculateTrustImpact = (interactionType: string) => {
   return impacts[interactionType] || 1;
 };
 
+// Reminder system functions
+const getReminderMessage = (promises: any[]) => {
+  const activePromises = promises.filter(p => p.status === 'active' || p.status === 'drafting');
+  
+  if (activePromises.length === 0) return null;
+  
+  const urgentPromises = activePromises.filter(p => {
+    const deadline = convertFirestoreDate(p.deadline);
+    const today = new Date();
+    const diffTime = Math.abs(deadline - today);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    return diffDays <= 2;
+  });
+  
+  if (urgentPromises.length > 0) {
+    return `You have ${urgentPromises.length} promise${urgentPromises.length > 1 ? 's' : ''} due soon!`;
+  }
+  
+  return `Don't forget about your active promises!`;
+};
+
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [streak, setStreak] = useState(0);
@@ -72,11 +93,15 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [showReminder, setShowReminder] = useState(false);
+  const [reminderMessage, setReminderMessage] = useState('');
   const router = useRouter();
   const promiseCardRef = useRef<any>(null);
   const trustBarRef = useRef<any>(null);
   const chatbotRef = useRef<any>(null);
   const onboardingRef = useRef<any>(null);
+  const reminderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reminderIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -253,6 +278,68 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [user, trustScore, streak]);
 
+  // Reminder System - Beautiful, non-intrusive notifications
+  useEffect(() => {
+    // Check if browser supports notifications
+    const canShowNotifications = 'Notification' in window && Notification.permission === 'granted';
+    
+    // Function to show a reminder
+    const showReminder = () => {
+      const message = getReminderMessage(promises);
+      if (!message) return;
+      
+      setReminderMessage(message);
+      setShowReminder(true);
+      
+      // Auto-hide after 5 seconds
+      if (reminderTimeoutRef.current) {
+        clearTimeout(reminderTimeoutRef.current);
+      }
+      
+      reminderTimeoutRef.current = setTimeout(() => {
+        setShowReminder(false);
+        reminderTimeoutRef.current = null;
+      }, 5000);
+      
+      // Show browser notification if permitted
+      if (canShowNotifications) {
+        new Notification('TrustNet Reminder', {
+          body: message,
+          icon: '/icon-192.png'
+        });
+      }
+    };
+    
+    // Initial check
+    showReminder();
+    
+    // Set up interval to check every 20 minutes
+    reminderIntervalRef.current = setInterval(showReminder, 20 * 60 * 1000);
+    
+    // Cleanup on unmount
+    return () => {
+      if (reminderTimeoutRef.current) {
+        clearTimeout(reminderTimeoutRef.current);
+      }
+      if (reminderIntervalRef.current) {
+        clearInterval(reminderIntervalRef.current);
+      }
+    };
+  }, [promises]);
+
+  // Request notification permission (only once)
+  useEffect(() => {
+    if ('Notification' in window) {
+      if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            console.log('Notification permission granted');
+          }
+        });
+      }
+    }
+  }, []);
+
   // Add tagged contact
   const handleAddContact = () => {
     if (!contactInput.trim()) return;
@@ -312,7 +399,7 @@ export default function Dashboard() {
     setCircleMembers(prev => prev.filter((_, i) => i !== index));
   };
 
-  // WhatsApp deep link
+  // WhatsApp deep link - FIXED
   const sendWhatsApp = (phone: string) => {
     // Clean phone number and ensure it has country code
     let cleanedPhone = phone.replace(/\D/g, '');
@@ -322,17 +409,27 @@ export default function Dashboard() {
       cleanedPhone = cleanedPhone.substring(1);
     }
     
+    // If phone number doesn't have country code, add default US code
+    if (cleanedPhone.length === 10) {
+      cleanedPhone = '1' + cleanedPhone;
+    }
+    
     // If phone number is still too short, show error
-    if (cleanedPhone.length < 10) {
+    if (cleanedPhone.length < 11) {
       alert('Please enter a valid phone number with country code (e.g., +15551234567)');
       return;
     }
     
+    // Ensure it starts with country code
+    if (!cleanedPhone.startsWith('+')) {
+      cleanedPhone = '+' + cleanedPhone;
+    }
+    
     const message = encodeURIComponent(`I've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?`);
-    window.open(`https://wa.me/${cleanedPhone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${cleanedPhone.replace('+', '')}?text=${message}`, '_blank');
   };
 
-  // SMS deep link
+  // SMS deep link - FIXED
   const sendSMS = (phone: string) => {
     // Clean phone number
     let cleanedPhone = phone.replace(/\D/g, '');
@@ -342,11 +439,27 @@ export default function Dashboard() {
       cleanedPhone = cleanedPhone.substring(1);
     }
     
+    // If phone number doesn't have country code, add default US code
+    if (cleanedPhone.length === 10) {
+      cleanedPhone = '1' + cleanedPhone;
+    }
+    
+    // If phone number is still too short, show error
+    if (cleanedPhone.length < 11) {
+      alert('Please enter a valid phone number with country code (e.g., +15551234567)');
+      return;
+    }
+    
+    // Ensure it starts with country code
+    if (!cleanedPhone.startsWith('+')) {
+      cleanedPhone = '+' + cleanedPhone;
+    }
+    
     const message = encodeURIComponent(`I've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?`);
     window.open(`sms:${cleanedPhone}?&body=${message}`, '_blank');
   };
 
-  // Email deep link
+  // Email deep link - FIXED
   const sendEmail = (email: string) => {
     const subject = encodeURIComponent("Join me in my TrustNet promise");
     const body = encodeURIComponent(`Hi,\n\nI've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?\n\nCheck it out: [TrustNet Link]`);
@@ -422,13 +535,13 @@ export default function Dashboard() {
       for (const contact of taggedContacts) {
         if (contact.type === 'phone') {
           setTimeout(() => {
-            if (window.confirm(`Send WhatsApp message to ${contact.value}?`)) {
+            if (window.confirm(`📱 Send WhatsApp message to ${contact.value}?`)) {
               sendWhatsApp(contact.value);
             }
           }, 500);
         } else {
           setTimeout(() => {
-            if (window.confirm(`Send email to ${contact.value}?`)) {
+            if (window.confirm(`✉️ Send email to ${contact.value}?`)) {
               sendEmail(contact.value);
             }
           }, 500);
@@ -502,7 +615,7 @@ export default function Dashboard() {
     setSelectedPromise(promise);
   };
 
-  // Delete promise functionality
+  // Delete promise functionality - FIXED
   const handleDeletePromise = async (promise: any) => {
     if (!window.confirm("Are you sure you want to delete this promise? This cannot be undone.")) {
       return;
@@ -815,6 +928,23 @@ export default function Dashboard() {
       itemScope 
       itemType="https://schema.org/WebApplication"
     >
+      {/* Beautiful Reminder Notification */}
+      {showReminder && (
+        <div className="fixed top-4 right-4 z-50 animate-fade-in">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-3 border border-cyan-200 dark:border-cyan-900/50 max-w-xs">
+            <div className="flex items-start gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center text-white text-sm">
+                🌿
+              </div>
+              <div>
+                <p className="font-medium text-gray-800 dark:text-gray-200 text-sm">Trust Reminder</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">{reminderMessage}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SEO Structured Data */}
       <script 
         type="application/ld+json"
@@ -1808,13 +1938,23 @@ export default function Dashboard() {
                 ))}
               </div>
               
-              {/* Contact Type Buttons */}
+              {/* Contact Type Buttons - FIXED */}
               <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
                     key={type}
-                    onClick={() => setShowContactModal({ type: 'phone', visible: true, forCircle: false })}
-                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs"
+                    onClick={() => {
+                      setShowContactModal({ 
+                        visible: true, 
+                        type: type.toLowerCase(), 
+                        forCircle: false 
+                      });
+                    }}
+                    className={`flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs ${
+                      showContactModal.visible && showContactModal.type === type.toLowerCase() 
+                        ? 'ring-2 ring-cyan-500' 
+                        : ''
+                    }`}
                   >
                     {type === 'Family' && '👨‍👩‍👧‍👦'}
                     {type === 'Friends' && '👫'}
@@ -1822,6 +1962,38 @@ export default function Dashboard() {
                   </button>
                 ))}
               </div>
+              
+              {/* Contact Input */}
+              {showContactModal.visible && !showContactModal.forCircle && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder={`Enter ${showContactModal.type} contact`}
+                    value={contactInput}
+                    onChange={(e) => setContactInput(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddContact();
+                      }
+                    }}
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={handleAddContact}
+                      className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-2 rounded-lg font-medium hover:opacity-90 transition-opacity text-sm"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setShowContactModal({ visible: false, type: 'phone', forCircle: false })}
+                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Action Buttons */}
@@ -1901,13 +2073,23 @@ export default function Dashboard() {
                 ))}
               </div>
               
-              {/* Add Members Buttons */}
+              {/* Contact Type Buttons - FIXED */}
               <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
                     key={type}
-                    onClick={() => setShowContactModal({ type: 'phone', visible: true, forCircle: true })}
-                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs"
+                    onClick={() => {
+                      setShowContactModal({ 
+                        visible: true, 
+                        type: type.toLowerCase(), 
+                        forCircle: true 
+                      });
+                    }}
+                    className={`flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs ${
+                      showContactModal.visible && showContactModal.forCircle && showContactModal.type === type.toLowerCase() 
+                        ? 'ring-2 ring-cyan-500' 
+                        : ''
+                    }`}
                   >
                     {type === 'Family' && '👨‍👩‍👧‍👦'}
                     {type === 'Friends' && '👫'}
@@ -1915,6 +2097,38 @@ export default function Dashboard() {
                   </button>
                 ))}
               </div>
+              
+              {/* Contact Input */}
+              {showContactModal.visible && showContactModal.forCircle && (
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder={`Enter ${showContactModal.type} contact`}
+                    value={contactInput}
+                    onChange={(e) => setContactInput(e.target.value)}
+                    className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddCircleMember();
+                      }
+                    }}
+                  />
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={handleAddCircleMember}
+                      className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white py-2 rounded-lg font-medium hover:opacity-90 transition-opacity text-sm"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setShowContactModal({ visible: false, type: 'phone', forCircle: true })}
+                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
               
               {/* Member Count Info */}
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -1997,6 +2211,15 @@ export default function Dashboard() {
               🛠️ Need Help?
             </button>
             <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => {
+                  handleDeletePromise(selectedPromise);
+                  setSelectedPromise(null);
+                }}
+                className="flex-1 bg-red-500 text-white p-2 rounded-lg font-medium hover:bg-red-600 transition-colors text-sm"
+              >
+                Delete
+              </button>
               <button
                 onClick={() => setSelectedPromise(null)}
                 className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
