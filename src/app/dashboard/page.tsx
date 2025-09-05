@@ -492,9 +492,9 @@ export default function Dashboard() {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
       
-      alert('✅ Promise confirmed! You\'ve built clarity together.');
+      alert('✅ Agreement confirmed! You\'ve built clarity together.');
     } catch (error) {
-      alert('Error confirming promise: ' + error.message);
+      alert('Error confirming agreement: ' + error.message);
     }
   };
 
@@ -763,6 +763,15 @@ export default function Dashboard() {
     }
   ];
 
+  // Fixed onboarding click handler to prevent immediate closure
+  const handleOnboardingClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Only close onboarding if clicking outside the content area
+    if (e.target === e.currentTarget) {
+      completeOnboarding();
+    }
+  };
+
   if (hasError) {
     return (
       <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl text-center max-w-2xl mx-auto mt-8">
@@ -823,33 +832,33 @@ export default function Dashboard() {
             },
             "operatingSystem": "All",
             "keywords": "trust, social network, accountability, promises, trust score, relationship building, small groups, trust circles, social platform",
-            "url": "https://trstnet.com",
-            "image": "https://trstnet.com/og-image.jpg",
+            "url": "https://trustnet.example.com",
+            "image": "https://trustnet.example.com/og-image.jpg",
             "creator": {
               "@type": "Organization",
               "name": "TrustNet Team",
-              "url": "https://trstnet.com"
+              "url": "https://trustnet.example.com"
             }
           })
         }}
       />
       
       {/* Canonical URL */}
-      <link rel="canonical" href="https://trstnet.com/dashboard" />
+      <link rel="canonical" href="https://trustnet.example.com/dashboard" />
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta property="og:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta property="og:image" content="https://trstnet.com/og-dashboard.jpg" />
-      <meta property="og:url" content="https://trstnet.com/dashboard" />
+      <meta property="og:image" content="https://trustnet.example.com/og-dashboard.jpg" />
+      <meta property="og:url" content="https://trustnet.example.com/dashboard" />
       <meta property="og:type" content="website" />
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta name="twitter:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta name="twitter:image" content="https://trstnet.com/og-dashboard.jpg" />
-
+      <meta name="twitter:image" content="https://trustnet.example.com/og-dashboard.jpg" />
+      
       {/* Performance Optimization: Preload critical resources */}
       <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       
@@ -862,7 +871,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 mb-3 sm:mb-0">
             <span className="text-2xl">🌿</span>
             <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
-              TrustNet - 信木 Xin Mu
+              TrustNet-信木 Xin Mu
             </h1>
             <span className="text-2xl">🌿</span>
           </div>
@@ -1351,10 +1360,10 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* TrustNet Snapshot Section - Semantic Section Tag */}
+        {/* Trust Snapshot Section - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <span>🔍</span> TrustNet Snapshot
+            <span>🔍</span> Trust Snapshot
           </h2>
           
           {/* Trust Score */}
@@ -1435,18 +1444,18 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Promise's Zone - Semantic Section Tag */}
+        {/* Active Agreements Zone - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <span>📄</span> Active Promises
+            <span>📄</span> Active Agreements
           </h2>
-
-          {/* Promise Timeline */}
+          
+          {/* Agreement Timeline */}
           <div className="relative pl-8 ml-3">
             {/* Timeline line */}
             <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-600 z-0"></div>
-
-            {/* Promise items */}
+            
+            {/* Agreement items */}
             {promises.filter(p => p.status === 'active' || p.status === 'drafting').slice(0, 3).map((p, index) => (
               <div 
                 key={p.id} 
@@ -1493,13 +1502,13 @@ export default function Dashboard() {
             ))}
           </div>
           
-          {/* Add Promise Button */}
+          {/* Add Agreement Button */}
           <div className="text-center mt-3">
             <button 
               onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm w-full"
             >
-              <span>+</span> Add Promise
+              <span>+</span> Add Agreement
             </button>
           </div>
         </section>
@@ -1831,7 +1840,7 @@ export default function Dashboard() {
                 onClick={handleSavePromise}
                 className="flex-1 bg-blue-600 text-white p-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
               >
-                🌿 Plant It 🌿
+                🌿 Plant It
               </button>
             </div>
           </div>
@@ -2118,12 +2127,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Onboarding Tour */}
+      {/* Onboarding Tour - FIXED VERSION */}
       {showOnboarding && (
         <div 
           ref={onboardingRef}
           className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
-          onClick={completeOnboarding}
+          onClick={handleOnboardingClick}
         >
           <div 
             className="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-md w-full mx-4 shadow-2xl relative"
@@ -2178,10 +2187,16 @@ export default function Dashboard() {
                 Skip Tour
               </button>
               <button
-                onClick={completeOnboarding}
+                onClick={() => {
+                  if (onboardingStep < ONBOARDING_STEPS.length - 1) {
+                    setOnboardingStep(prev => prev + 1);
+                  } else {
+                    completeOnboarding();
+                  }
+                }}
                 className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity text-sm"
               >
-                Get Started
+                {onboardingStep < ONBOARDING_STEPS.length - 1 ? 'Next' : 'Get Started'}
               </button>
             </div>
             
