@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, query, onSnapshot, updateDoc, deleteDoc, doc, where } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, updateDoc, deleteDoc, doc, getDoc, setDoc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Helper function to convert Firestore date objects to JavaScript Date objects
@@ -147,13 +147,20 @@ export default function Dashboard() {
     return filteredPosts;
   };
 
-  // Load theme
+  // Load theme - FIXED VERSION
   useEffect(() => {
     const saved = localStorage.getItem('darkMode');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = saved ? saved === 'true' : prefersDark;
+    
     setDarkMode(isDark);
-    if (isDark) document.documentElement.classList.add('dark');
+    
+    // Properly add OR remove the 'dark' class
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   // Toggle theme
@@ -180,7 +187,7 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [router]);
 
-  // Load user activity and trust score from Firestore
+  // Load user activity and trust score from Firestore - FIXED
   useEffect(() => {
     if (!user) return;
     
@@ -200,7 +207,7 @@ export default function Dashboard() {
             setShowOnboarding(true);
           }
         } else {
-          // New user - create initial activity record
+          // NEW: Create initial activity record with proper structure
           await setDoc(doc(db, 'userActivity', user.uid), {
             firstVisit: new Date().toISOString(),
             promisesCreated: 0,
@@ -209,6 +216,8 @@ export default function Dashboard() {
             hasCompletedOnboarding: false
           });
           
+          setTrustScore(0);
+          setStreak(0);
           setShowOnboarding(true);
         }
       } catch (error) {
@@ -262,13 +271,34 @@ export default function Dashboard() {
       setPromises(list);
       setIsLoading(false);
       
-      // Update user activity in Firestore
+      // Update user activity in Firestore - FIXED
       if (user) {
-        updateDoc(doc(db, 'userActivity', user.uid), {
-          promisesCreated: list.length,
-          trustScore: trustScore,
-          streak: streak
-        }).catch(console.error);
+        const updateUserActivity = async () => {
+          try {
+            const activityDoc = await getDoc(doc(db, 'userActivity', user.uid));
+            
+            if (activityDoc.exists()) {
+              await updateDoc(doc(db, 'userActivity', user.uid), {
+                promisesCreated: list.length,
+                trustScore: trustScore,
+                streak: streak
+              });
+            } else {
+              // Document doesn't exist, create it instead
+              await setDoc(doc(db, 'userActivity', user.uid), {
+                firstVisit: new Date().toISOString(),
+                promisesCreated: list.length,
+                trustScore: trustScore,
+                streak: streak,
+                hasCompletedOnboarding: false
+              });
+            }
+          } catch (error) {
+            console.error("Error updating user activity:", error);
+          }
+        };
+        
+        updateUserActivity();
       }
     }, (error) => {
       console.error("Error fetching promises:", error);
@@ -304,9 +334,11 @@ export default function Dashboard() {
       
       // Show browser notification if permitted
       if (canShowNotifications) {
+        // FIX: Use absolute path for icon to avoid 404
+        const iconPath = window.location.origin + '/icon-192.png';
         new Notification('TrustNet Reminder', {
           body: message,
-          icon: '/icon-192.png'
+          icon: iconPath
         });
       }
     };
@@ -606,9 +638,9 @@ export default function Dashboard() {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
       
-      alert('✅ promise confirmed! You\'ve built clarity together.');
+      alert('✅ Agreement confirmed! You\'ve built clarity together.');
     } catch (error) {
-      alert('Error confirming promise: ' + error.message);
+      alert('Error confirming agreement: ' + error.message);
     }
   };
 
@@ -730,7 +762,7 @@ export default function Dashboard() {
         progress: `Day ${Math.floor(Math.random() * 5) + 4} (Skipped)`
       });
       
-      alert('✅ Nudge skipped. promise remains active.');
+      alert('✅ Nudge skipped. Agreement remains active.');
     } catch (error) {
       console.error('Error skipping nudge:', error);
       
@@ -844,9 +876,23 @@ export default function Dashboard() {
     // Mark onboarding as completed in Firestore
     if (user) {
       try {
-        await updateDoc(doc(db, 'userActivity', user.uid), {
-          hasCompletedOnboarding: true
-        });
+        const activityDoc = await getDoc(doc(db, 'userActivity', user.uid));
+        
+        if (activityDoc.exists()) {
+          await updateDoc(doc(db, 'userActivity', user.uid), {
+            hasCompletedOnboarding: true
+          });
+        } else {
+          // Document doesn't exist, create it instead
+          await setDoc(doc(db, 'userActivity', user.uid), {
+            firstVisit: new Date().toISOString(),
+            promisesCreated: 0,
+            trustScore: trustScore,
+            streak: streak,
+            hasCompletedOnboarding: true
+          });
+        }
+        
         setHasCompletedOnboarding(true);
       } catch (error) {
         console.error("Error updating onboarding status:", error);
@@ -863,7 +909,7 @@ export default function Dashboard() {
       position: "bottom"
     },
     {
-      title: "Daily Promise Builder",
+      title: "Daily Builder",
       content: "Start here each day to build trust through specific, guided actions. Each day focuses on a different aspect of trust-building.",
       target: null,
       position: "bottom"
@@ -991,32 +1037,32 @@ export default function Dashboard() {
             },
             "operatingSystem": "All",
             "keywords": "trust, social network, accountability, promises, trust score, relationship building, small groups, trust circles, social platform",
-            "url": "https://trstnet.com",
-            "image": "https://trstnet.com/og-image.jpg",
+            "url": "https://trustnet.example.com",
+            "image": "https://trustnet.example.com/og-image.jpg",
             "creator": {
               "@type": "Organization",
               "name": "TrustNet Team",
-              "url": "https://trstnet.com"
+              "url": "https://trustnet.example.com"
             }
           })
         }}
       />
       
       {/* Canonical URL */}
-      <link rel="canonical" href="https://trstnet.com/dashboard" />
+      <link rel="canonical" href="https://trustnet.example.com/dashboard" />
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta property="og:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta property="og:image" content="https://trstnet.com/og-dashboard.jpg" />
-      <meta property="og:url" content="https://trstnet.com/dashboard" />
+      <meta property="og:image" content="https://trustnet.example.com/og-dashboard.jpg" />
+      <meta property="og:url" content="https://trustnet.example.com/dashboard" />
       <meta property="og:type" content="website" />
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta name="twitter:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta name="twitter:image" content="https://trstnet.com/og-dashboard.jpg" />
+      <meta name="twitter:image" content="https://trustnet.example.com/og-dashboard.jpg" />
       
       {/* Performance Optimization: Preload critical resources */}
       <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
@@ -1390,7 +1436,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {promises.filter(p => p.status === 'active' || p.status === 'drafting').length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400 italic text-center py-3">
-                  No active promises yet.🌱 Plant your first seed! 🌱
+                  No active promises yet. Plant your first seed! 🌱
                 </p>
               ) : (
                 promises.filter(p => p.status === 'active' || p.status === 'drafting').map((p) => (
@@ -1627,18 +1673,18 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Promise Zone - Semantic Section Tag */}
+        {/* Active Agreements Zone - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-            <span>📄</span> Active Promise
+            <span>📄</span> Active Agreements
           </h2>
           
-          {/* Promise Timeline */}
+          {/* Agreement Timeline */}
           <div className="relative pl-8 ml-3">
             {/* Timeline line */}
             <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-600 z-0"></div>
             
-            {/* Promise items */}
+            {/* Agreement items */}
             {promises.filter(p => p.status === 'active' || p.status === 'drafting').slice(0, 3).map((p, index) => (
               <div 
                 key={p.id} 
@@ -1685,13 +1731,13 @@ export default function Dashboard() {
             ))}
           </div>
           
-          {/* Add Promise Button */}
+          {/* Add Agreement Button */}
           <div className="text-center mt-3">
             <button 
               onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm w-full"
             >
-              <span>+</span> Add Promise
+              <span>+</span> Add Agreement
             </button>
           </div>
         </section>
