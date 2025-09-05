@@ -108,7 +108,7 @@ export default function Profile() {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent'
         }}>
-          🌿 TrustNet-信木 🌿
+          🌿 TrustNet - 信木 Xin Mu 🌿
         </h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
