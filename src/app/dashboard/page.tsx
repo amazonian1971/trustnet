@@ -492,9 +492,9 @@ export default function Dashboard() {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 3000);
       
-      alert('✅ Agreement confirmed! You\'ve built clarity together.');
+      alert('✅ Promise confirmed! You\'ve built clarity together.');
     } catch (error) {
-      alert('Error confirming agreement: ' + error.message);
+      alert('Error confirming promise: ' + error.message);
     }
   };
 
@@ -823,12 +823,12 @@ export default function Dashboard() {
             },
             "operatingSystem": "All",
             "keywords": "trust, social network, accountability, promises, trust score, relationship building, small groups, trust circles, social platform",
-            "url": "https://trustnet.example.com",
-            "image": "https://trustnet.example.com/og-image.jpg",
+            "url": "https://trstnet.com",
+            "image": "https://trstnet.com/og-image.jpg",
             "creator": {
               "@type": "Organization",
               "name": "TrustNet Team",
-              "url": "https://trustnet.example.com"
+              "url": "https://trstnetcom"
             }
           })
         }}
@@ -862,7 +862,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🌿</span>
             <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
-              TrustNet-信木 Xin Mu
+              TrustNet- A Promise made is a seed planted
             </h1>
             <span className="text-2xl">🌿</span>
           </div>
@@ -949,11 +949,11 @@ export default function Dashboard() {
           `}</style>
         </section>
 
-        {/* Daily Builder Card - Semantic Section Tag */}
+        {/* Daily Promise Builder Card - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold flex items-center gap-2">
-              <span>🧩</span> Daily Builder
+              <span>🧩</span> Daily Promise Builder
             </h2>
             <div className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm">
               Day {((new Date().getDate() % 3) + 1)}
@@ -1432,10 +1432,10 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Agreements Zone - Semantic Section Tag */}
+        {/* Active Promise Zone - Semantic Section Tag */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>📄</span> Active Agreements
+            <span>📄</span> Active Promise's
           </h2>
           
           {/* Agreement Timeline */}
@@ -1490,13 +1490,13 @@ export default function Dashboard() {
             ))}
           </div>
           
-          {/* Add Agreement Button */}
+          {/* Add Promise Button */}
           <div className="text-center mt-4">
             <button 
               onClick={() => setShowModal(true)}
               className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              <span>+</span> Add Agreement
+              <span>+</span> Add Promise
             </button>
           </div>
         </section>

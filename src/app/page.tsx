@@ -55,7 +55,7 @@ export default function Home() {
         backgroundClip: 'text',
         color: 'transparent'
       }}>
-       🌿 TrustNet - 信木-Xìn Mù 🌿
+       🌿 TrustNet - A promise made is a seed planted. 🌿
       </h1>
 
       <p style={{
@@ -87,7 +87,7 @@ export default function Home() {
       <div style={{ fontSize: '48px', margin: '60px 0 20px' }}>🌿</div>
 
       <p style={{ fontSize: '0.9rem', color: '#666' }}>
-        Powered by Qwen • A promise kept is a tree grown.
+        Powered by Qwen • A promise made is a seed planted..
       </p>
     </div>
   );
