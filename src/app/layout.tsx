@@ -39,10 +39,13 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TrustNet" />
         <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body className={`${inter.className} bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-indigo-900 transition-colors duration-300`}>
-        {children}
-        <PWAInstaller />
+        <div className="min-h-screen flex flex-col">
+          {children}
+          <PWAInstaller />
+        </div>
       </body>
     </html>
   )

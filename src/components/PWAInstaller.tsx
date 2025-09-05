@@ -1,3 +1,4 @@
+// src/components/PWAInstaller.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -64,7 +65,7 @@ export default function PWAInstaller() {
     <div className="fixed bottom-4 right-4 z-50 animate-fade-in">
       <button
         onClick={handleInstallClick}
-        className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-xl shadow-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
+        className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-xl shadow-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 text-sm sm:text-base"
       >
         <span>+</span> Install TrustNet
       </button>
