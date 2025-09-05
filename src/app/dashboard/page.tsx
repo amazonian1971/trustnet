@@ -828,49 +828,49 @@ export default function Dashboard() {
             "creator": {
               "@type": "Organization",
               "name": "TrustNet Team",
-              "url": "https://trstnetcom"
+              "url": "https://trstnet.com"
             }
           })
         }}
       />
       
       {/* Canonical URL */}
-      <link rel="canonical" href="https://trustnet.example.com/dashboard" />
+      <link rel="canonical" href="https://trstnet.com/dashboard" />
       
       {/* Open Graph Meta Tags */}
       <meta property="og:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta property="og:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta property="og:image" content="https://trustnet.example.com/og-dashboard.jpg" />
-      <meta property="og:url" content="https://trustnet.example.com/dashboard" />
+      <meta property="og:image" content="https://trstnet.com/og-dashboard.jpg" />
+      <meta property="og:url" content="https://trstnet.com/dashboard" />
       <meta property="og:type" content="website" />
       
       {/* Twitter Card Meta Tags */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="TrustNet Dashboard - Build Trust Through Promises" />
       <meta name="twitter:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta name="twitter:image" content="https://trustnet.example.com/og-dashboard.jpg" />
-      
+      <meta name="twitter:image" content="https://trstnet.com/og-dashboard.jpg" />
+
       {/* Performance Optimization: Preload critical resources */}
       <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header - Semantic Header Tag */}
         <header 
-          className="flex justify-between items-center mb-8 p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
+          className="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
           role="banner"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-3 sm:mb-0">
             <span className="text-2xl">🌿</span>
             <h1 className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
-              TrustNet- A Promise made is a seed planted
+              TrustNet - 信木 Xin Mu
             </h1>
             <span className="text-2xl">🌿</span>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-center sm:justify-end">
             <button
               onClick={() => router.push('/profile')}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors w-full sm:w-auto"
               aria-label="View profile"
             >
               <span>👤</span>
@@ -878,7 +878,7 @@ export default function Dashboard() {
             </button>
             <button
               onClick={toggleTheme}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors w-full sm:w-auto"
               aria-label="Toggle dark mode"
             >
               {darkMode ? '☀️ Light' : '🌙 Dark'}
@@ -888,7 +888,7 @@ export default function Dashboard() {
                 auth.signOut();
                 router.push('/auth');
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors w-full sm:w-auto"
               aria-label="Sign out"
             >
               <span>🔐</span>
@@ -903,11 +903,11 @@ export default function Dashboard() {
         {/* Trust Score Section - Semantic Section Tag */}
         <section 
           ref={trustBarRef}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl"
+          className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl"
           aria-labelledby="trust-score-heading"
         >
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row justify-between items-center">
+            <div className="flex items-center gap-3 mb-3 sm:mb-0">
               <span className="text-xl">🏆</span>
               <div>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">Trust Score</p>
@@ -949,18 +949,21 @@ export default function Dashboard() {
           `}</style>
         </section>
 
-        {/* Daily Promise Builder Card - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              <span>🧩</span> Daily Promise Builder
-            </h2>
+        {/* Daily Builder Card - Semantic Section Tag */}
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+            <div className="mb-3 sm:mb-0">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <span>🧩</span> Daily Builder
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 sm:hidden">Tap to start building trust</p>
+            </div>
             <div className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm">
               Day {((new Date().getDate() % 3) + 1)}
             </div>
           </div>
           
-          <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-4 mb-4">
+          <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-xl p-3 mb-3">
             <h3 className="text-base font-medium text-gray-800 dark:text-gray-200 flex items-center gap-2">
               {((new Date().getDate() % 3) + 1) === 1 ? '🤝 Day 1: Promise Flow' : 
                ((new Date().getDate() % 3) + 1) === 2 ? '🌐 Day 2: Reputation Logic' : 
@@ -984,19 +987,19 @@ export default function Dashboard() {
         </section>
 
         {/* Trust Feed Section - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>📰</span> Trust Feed
           </h2>
           
           {/* Feed Header with Trust Circles Filter */}
-          <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-            <div className="flex gap-2 overflow-x-auto py-1">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+            <div className="flex gap-1 overflow-x-auto py-1 w-full sm:w-auto">
               {['all', 'friends', 'trust-circles'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveFeedTab(tab)}
-                  className={`px-3 py-1.5 rounded-full font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-full font-medium transition-all text-sm ${
                     activeFeedTab === tab
                       ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -1007,12 +1010,12 @@ export default function Dashboard() {
               ))}
             </div>
             
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-              <span>Sort by:</span>
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm w-full sm:w-auto">
+              <span className="whitespace-nowrap">Sort by:</span>
               <select 
                 value={feedSort}
                 onChange={(e) => setFeedSort(e.target.value)}
-                className="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 text-sm"
+                className="w-full sm:w-auto bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 text-sm"
               >
                 <option value="recent">Most Recent</option>
                 <option value="trust">Highest Trust Impact</option>
@@ -1022,7 +1025,7 @@ export default function Dashboard() {
           </div>
           
           {/* Trust Feed Posts */}
-          <div className="space-y-5">
+          <div className="space-y-4">
             {getFilteredAndSortedPosts().map((p) => (
               <article 
                 key={p.id} 
@@ -1044,7 +1047,7 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Post Content */}
-                <div className="mb-4">
+                <div className="mb-3">
                   <p className="text-gray-700 dark:text-gray-300 mb-2">Just made a new promise:</p>
                   <div className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
                     <div className="flex items-center gap-2 mb-1">
@@ -1060,8 +1063,8 @@ export default function Dashboard() {
                 </div>
                 
                 {/* Post Actions */}
-                <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-3 border-t border-gray-200 dark:border-gray-700 gap-2">
+                  <div className="flex gap-2 overflow-x-auto">
                     {['🙌 Believe', '🌟 Inspire', '🤝 Support'].map((action) => (
                       <button
                         key={action}
@@ -1069,7 +1072,7 @@ export default function Dashboard() {
                           e.stopPropagation();
                           handleTrustScoreUpdate('support-reaction');
                         }}
-                        className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors text-sm"
+                        className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors text-sm whitespace-nowrap"
                       >
                         {action}
                       </button>
@@ -1087,14 +1090,14 @@ export default function Dashboard() {
             
             {/* Empty state if no posts match the filter */}
             {getFilteredAndSortedPosts().length === 0 && (
-              <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                 <p>No posts in this category yet.</p>
                 {activeFeedTab === 'trust-circles' && (
                   <button
                     onClick={() => setShowTrustCircleModal(true)}
-                    className="mt-3 inline-flex bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+                    className="mt-3 inline-flex bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
                   >
-                    Create Your First Trust Circle
+                    Create Your First Circle
                   </button>
                 )}
               </div>
@@ -1103,47 +1106,47 @@ export default function Dashboard() {
         </section>
 
         {/* Trust Circles Section - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
+            <h2 className="text-lg font-bold flex items-center gap-2 mb-2 sm:mb-0">
               <span>👥</span> Trust Circles
             </h2>
             <button
               onClick={() => setShowTrustCircleModal(true)}
-              className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
+              className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity w-full sm:w-auto"
             >
               + New Circle
             </button>
           </div>
           
           {/* Trust Circles List */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Trust Circles from Firestore */}
             {promises.filter(p => p.trustCircleId).length === 0 ? (
-              <div className="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                <span className="text-3xl mb-2">👥</span>
+              <div className="flex flex-col items-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                <span className="text-2xl mb-2">👥</span>
                 <h3 className="text-base font-medium text-gray-800 dark:text-gray-200 mb-1">No Trust Circles Yet</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-3">
                   Create a small accountability group (3-5 people) for building trust together
                 </p>
                 <button
                   onClick={() => setShowTrustCircleModal(true)}
-                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity w-full sm:w-auto"
                 >
                   Create Your First Circle
                 </button>
               </div>
             ) : (
               promises.filter(p => p.trustCircleId).map((circle, index) => (
-                <div key={index} className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
-                  <div className="flex justify-between items-center mb-2">
+                <div key={index} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
                     <h3 className="font-medium text-gray-800 dark:text-gray-200">Trust Circle {index + 1}</h3>
-                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full text-xs">
+                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 px-2 py-0.5 rounded-full text-xs mt-1 sm:mt-0">
                       {circle.taggedContacts ? circle.taggedContacts.length + 1 : '3'}/5 members
                     </span>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Daily accountability group</p>
-                  <div className="flex gap-2 flex-wrap mb-3">
+                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">Daily accountability group</p>
+                  <div className="flex gap-2 flex-wrap mb-2">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white text-xs">
                       U
                     </div>
@@ -1168,13 +1171,13 @@ export default function Dashboard() {
         </section>
 
         {/* Dashboard Tabs - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-3 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <div className="flex mb-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-3 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <div className="flex flex-col sm:flex-row mb-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden">
             {['Active', 'Completed', 'Archived'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab.toLowerCase())}
-                className={`flex-1 py-3 font-medium transition-all ${
+                className={`flex-1 py-2.5 font-medium transition-all text-sm ${
                   activeTab === tab.toLowerCase()
                     ? 'text-cyan-500 dark:text-cyan-400 relative'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
@@ -1192,9 +1195,9 @@ export default function Dashboard() {
           
           {/* Active Promises Tab */}
           {activeTab === 'active' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {promises.filter(p => p.status === 'active' || p.status === 'drafting').length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 italic text-center py-4">
+                <p className="text-gray-500 dark:text-gray-400 italic text-center py-3">
                   No active promises yet. Plant your first seed! 🌱
                 </p>
               ) : (
@@ -1202,7 +1205,7 @@ export default function Dashboard() {
                   <div
                     key={p.id}
                     ref={p.id === newPromise?.id ? promiseCardRef : null}
-                    className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1"
                   >
                     {/* Status Badge and Delete Button */}
                     <div className="absolute top-3 right-3 flex gap-2">
@@ -1253,16 +1256,16 @@ export default function Dashboard() {
           
           {/* Completed Promises Tab */}
           {activeTab === 'completed' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {promises.filter(p => p.status === 'aligned').length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 italic text-center py-4">
+                <p className="text-gray-500 dark:text-gray-400 italic text-center py-3">
                   No completed promises yet. Keep building your trust! 🌱
                 </p>
               ) : (
                 promises.filter(p => p.status === 'aligned').map((p) => (
                   <div
                     key={p.id}
-                    className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md"
                   >
                     {/* Status Badge and Delete Button */}
                     <div className="absolute top-3 right-3 flex gap-2">
@@ -1301,16 +1304,16 @@ export default function Dashboard() {
           
           {/* Archived Promises Tab */}
           {activeTab === 'archived' && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {promises.filter(p => p.status === 'archived').length === 0 ? (
-                <p className="text-gray-500 dark:text-gray-400 italic text-center py-4">
+                <p className="text-gray-500 dark:text-gray-400 italic text-center py-3">
                   No archived promises yet.
                 </p>
               ) : (
                 promises.filter(p => p.status === 'archived').map((p) => (
                   <div
                     key={p.id}
-                    className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70"
+                    className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70"
                   >
                     {/* Status Badge and Delete Button */}
                     <div className="absolute top-3 right-3 flex gap-2">
@@ -1348,14 +1351,14 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* Trust Snapshot Section - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>🔍</span> Trust Snapshot
+        {/* TrustNet Snapshot Section - Semantic Section Tag */}
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <span>🔍</span> TrustNet Snapshot
           </h2>
           
           {/* Trust Score */}
-          <div className="flex items-center gap-4 mb-5">
+          <div className="flex flex-col items-center gap-3 mb-4">
             <div className="relative w-24 h-24">
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <circle
@@ -1383,14 +1386,14 @@ export default function Dashboard() {
                 </defs>
               </svg>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <div className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
+                <div className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
                   {trustScore}%
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Trust Score</div>
               </div>
             </div>
             
-            <div className="flex-1">
+            <div className="text-center">
               <div className="font-medium text-gray-800 dark:text-gray-200 mb-1">
                 {trustScore < 30 ? "Starting your trust journey" :
                  trustScore < 60 ? "Building solid foundations" :
@@ -1403,7 +1406,7 @@ export default function Dashboard() {
           </div>
           
           {/* Trust Metrics */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {[
               { title: 'Endorsements', value: promises.filter(p => p.status === 'aligned').length, color: 'cyan' },
               { title: 'Recent Agreements', value: promises.length, color: 'purple' },
@@ -1412,19 +1415,19 @@ export default function Dashboard() {
             ].map((metric, index) => (
               <div 
                 key={index}
-                className={`p-4 rounded-xl border ${
+                className={`p-3 rounded-xl border ${
                   darkMode 
                     ? 'bg-gray-50/5 border-gray-700' 
                     : `bg-${metric.color}-50 border-${metric.color}-100`
                 }`}
               >
-                <div className={`text-2xl font-bold ${
+                <div className={`text-xl font-bold ${
                   metric.color === 'cyan' ? 'text-cyan-500' : 
                   metric.color === 'purple' ? 'text-purple-500' : 'text-yellow-500'
                 }`}>
                   {metric.value}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {metric.title}
                 </div>
               </div>
@@ -1432,37 +1435,37 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Promise Zone - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>📄</span> Active Promise's
+        {/* Active Promise's Zone - Semantic Section Tag */}
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <span>📄</span> Active Promises
           </h2>
-          
-          {/* Agreement Timeline */}
+
+          {/* Promise Timeline */}
           <div className="relative pl-8 ml-3">
             {/* Timeline line */}
             <div className="absolute left-0 top-4 bottom-4 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-600 z-0"></div>
-            
-            {/* Agreement items */}
+
+            {/* Promise items */}
             {promises.filter(p => p.status === 'active' || p.status === 'drafting').slice(0, 3).map((p, index) => (
               <div 
                 key={p.id} 
-                className="relative mb-6 last:mb-0 z-10 cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-900/50 p-3 rounded-xl"
+                className="relative mb-4 last:mb-0 z-10 cursor-pointer transition-all hover:bg-gray-50 dark:hover:bg-gray-900/50 p-2 rounded-xl"
               >
                 {/* Timeline dot */}
-                <div className={`absolute -left-2 top-3.5 w-4 h-4 rounded-full border-2 ${
+                <div className={`absolute -left-2 top-3 w-4 h-4 rounded-full border-2 ${
                   p.status === 'drafting' ? 'bg-red-500 border-red-200 dark:border-red-900' : 'bg-cyan-500 border-cyan-200 dark:border-cyan-900'
                 }`}></div>
                 
                 {/* Item content */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="text-xl">{p.emoji}</span>
                   <div className="flex-1">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                      <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                         {p.title}
                       </h3>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      <span className={`px-1 py-0.5 rounded-full text-xs ${
                         p.status === 'drafting' 
                           ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
                           : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200'
@@ -1471,12 +1474,12 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="flex justify-between items-center mt-1">
-                      <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-sm">
+                      <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-xs">
                         <span>🗓️ {p.createdAt ? convertFirestoreDate(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown'}</span>
                         <span>·</span>
                         <span>{p.deadline ? convertFirestoreDate(p.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Unknown'}</span>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      <span className={`px-1 py-0.5 rounded-full text-xs ${
                         p.status === 'drafting' 
                           ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200' 
                           : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-200'
@@ -1491,10 +1494,10 @@ export default function Dashboard() {
           </div>
           
           {/* Add Promise Button */}
-          <div className="text-center mt-4">
+          <div className="text-center mt-3">
             <button 
               onClick={() => setShowModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm w-full"
             >
               <span>+</span> Add Promise
             </button>
@@ -1502,35 +1505,35 @@ export default function Dashboard() {
         </section>
 
         {/* Next Actions Zone - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>🚀</span> Next Actions
           </h2>
           
           {/* Action Cards */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Show actions for promises that need clarification */}
             {promises
               .filter(p => p.status === 'drafting')
               .map(p => (
-                <div key={p.id} className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-red-400 flex items-center justify-center text-white font-bold">
+                <div key={p.id} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-red-400 flex items-center justify-center text-white font-bold text-sm">
                     1
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                       Clarify "{p.title}"
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1 mb-3">
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mt-1 mb-2">
                       Your counterparty has questions about the timeframe
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleClarify(p);
                         }}
-                        className="bg-gradient-to-r from-red-500 to-red-400 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        className="bg-gradient-to-r from-red-500 to-red-400 text-white px-2 py-1 rounded-lg font-medium hover:opacity-90 transition-opacity text-xs w-full sm:w-auto"
                       >
                         Clarify
                       </button>
@@ -1539,7 +1542,7 @@ export default function Dashboard() {
                           e.stopPropagation();
                           handleRemindLater(p);
                         }}
-                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs w-full sm:w-auto"
                       >
                         Remind Later
                       </button>
@@ -1552,24 +1555,24 @@ export default function Dashboard() {
             {promises
               .filter(p => p.status === 'active')
               .map(p => (
-                <div key={p.id} className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white font-bold">
+                <div key={p.id} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm">
                     2
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                       Confirm "{p.title}"
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1 mb-3">
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mt-1 mb-2">
                       Your counterparty has accepted your terms
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleConfirm(p);
                         }}
-                        className="bg-gradient-to-r from-cyan-500 to-cyan-400 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        className="bg-gradient-to-r from-cyan-500 to-cyan-400 text-white px-2 py-1 rounded-lg font-medium hover:opacity-90 transition-opacity text-xs w-full sm:w-auto"
                       >
                         Confirm
                       </button>
@@ -1578,7 +1581,7 @@ export default function Dashboard() {
                           e.stopPropagation();
                           handleAddNotes(p);
                         }}
-                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs w-full sm:w-auto"
                       >
                         Add Notes
                       </button>
@@ -1591,24 +1594,24 @@ export default function Dashboard() {
             {promises
               .filter(p => p.status === 'active' && p.progress && p.progress.includes('Day'))
               .map(p => (
-                <div key={p.id} className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-l-4 border-yellow-500 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center justify-center text-white font-bold">
+                <div key={p.id} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-l-4 border-yellow-500 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-400 flex items-center justify-center text-white font-bold text-sm">
                     3
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                       Nudge "{p.title}"
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mt-1 mb-3">
+                    <p className="text-gray-600 dark:text-gray-300 text-xs mt-1 mb-2">
                       Your counterparty hasn't responded in 3 days
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           handleSendNudge(p);
                         }}
-                        className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-2 py-1 rounded-lg font-medium hover:opacity-90 transition-opacity text-xs w-full sm:w-auto"
                       >
                         Send Nudge
                       </button>
@@ -1617,7 +1620,7 @@ export default function Dashboard() {
                           e.stopPropagation();
                           handleSkipNudge(p);
                         }}
-                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs w-full sm:w-auto"
                       >
                         Skip
                       </button>
@@ -1629,33 +1632,29 @@ export default function Dashboard() {
         </section>
 
         {/* Progress Tracker Zone - Semantic Section Tag */}
-        <section className="bg-white dark:bg-gray-800 rounded-2xl p-5 mb-8 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+        <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>📈</span> Progress Tracker
           </h2>
           
           {/* Overall Progress */}
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium text-gray-700 dark:text-gray-300">Overall Agreement Momentum</span>
-              <span className="font-medium bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent">
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">Overall Agreement Momentum</span>
+              <span className="font-medium bg-gradient-to-r from-cyan-500 to-purple-600 bg-clip-text text-transparent text-sm">
                 {Math.min(100, Math.round((promises.filter(p => p.status === 'aligned').length / promises.length) * 100))}%
               </span>
             </div>
-            <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full transition-all duration-1000"
                 style={{ width: `${Math.min(100, Math.round((promises.filter(p => p.status === 'aligned').length / promises.length) * 100))}%` }}
               ></div>
             </div>
-            <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
-              <span>0%</span>
-              <span>100%</span>
-            </div>
           </div>
           
           {/* Milestones */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[
               { 
                 title: "Initial Agreement", 
@@ -1686,9 +1685,9 @@ export default function Dashboard() {
                 description: 'Schedule your first progress review'
               }
             ].map((milestone, index) => (
-              <div key={index} className="flex items-center gap-4">
+              <div key={index} className="flex items-center gap-3">
                 {/* Milestone marker */}
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs ${
                   milestone.status === 'completed' 
                     ? 'bg-gradient-to-r from-cyan-500 to-cyan-400' 
                     : milestone.status === 'in-progress'
@@ -1701,14 +1700,14 @@ export default function Dashboard() {
                 {/* Milestone content */}
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                       {milestone.title}
                     </h3>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       {milestone.date}
                     </span>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
+                  <p className="text-gray-600 dark:text-gray-300 text-xs mt-1">
                     {milestone.description}
                   </p>
                 </div>
@@ -1722,7 +1721,7 @@ export default function Dashboard() {
                       setTrustScore(prev => Math.min(100, prev + 1));
                       setShowTrustRipple(true);
                     }}
-                    className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-3 py-1.5 rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white px-2 py-1 rounded-lg font-medium text-xs hover:opacity-90 transition-opacity"
                   >
                     Confirm
                   </button>
@@ -1733,7 +1732,7 @@ export default function Dashboard() {
         </section>
 
         {/* Footer - Semantic Footer Tag */}
-        <footer className="text-center mt-12 text-gray-500 dark:text-gray-400 text-sm" role="contentinfo">
+        <footer className="text-center mt-4 text-gray-500 dark:text-gray-400 text-xs" role="contentinfo">
           <p>&quot;A promise made is a seed planted.&quot;</p>
           <p>Powered by TrustNet • The first social platform where trust is the currency</p>
         </footer>
@@ -1742,8 +1741,8 @@ export default function Dashboard() {
       {/* Make a Promise Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h2 className="text-xl font-bold text-center mb-5 text-blue-600 dark:text-blue-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-4 shadow-2xl">
+            <h2 className="text-xl font-bold text-center mb-4 text-blue-600 dark:text-blue-400">
               🤝 Make a Promise
             </h2>
             
@@ -1753,25 +1752,25 @@ export default function Dashboard() {
               placeholder="e.g. Journal every morning"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white text-sm"
             />
             
             <input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white text-sm"
             />
             
             {/* Emoji Selector */}
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="flex flex-wrap gap-1 mb-4">
               {['🌱', '📓', '🧘', '🏃', '📵', '📞', '🍽️', '📚'].map((e) => (
                 <button
                   key={e}
                   onClick={() => setEmoji(e)}
-                  className={`text-2xl p-2 rounded-lg transition-all ${
+                  className={`text-xl p-1 rounded-lg transition-all ${
                     emoji === e 
-                      ? 'ring-2 ring-blue-500 scale-110' 
+                      ? 'ring-2 ring-blue-500 scale-105' 
                       : 'hover:scale-105'
                   }`}
                 >
@@ -1781,13 +1780,13 @@ export default function Dashboard() {
             </div>
             
             {/* Contact Tagging Section */}
-            <div className="mb-5 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
-              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Share with others</h3>
+            <div className="mb-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
+              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2 text-sm">Share with others</h3>
               
               {/* Tagged Contacts */}
-              <div className="flex flex-wrap gap-2 mb-3">
+              <div className="flex flex-wrap gap-1 mb-2">
                 {taggedContacts.map((contact, i) => (
-                  <div key={i} className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">
+                  <div key={i} className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                     <span>{contact.type === 'phone' ? '📱' : '✉️'}</span>
                     <span>{contact.value}</span>
                     <button 
@@ -1801,12 +1800,12 @@ export default function Dashboard() {
               </div>
               
               {/* Contact Type Buttons */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
                     key={type}
                     onClick={() => setShowContactModal({ type: 'phone', visible: true, forCircle: false })}
-                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors text-sm"
+                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs"
                   >
                     {type === 'Family' && '👨‍👩‍👧‍👦'}
                     {type === 'Friends' && '👫'}
@@ -1817,22 +1816,22 @@ export default function Dashboard() {
             </div>
             
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => {
                   setShowModal(false);
                   setTaggedContacts([]);
                   setContactInput('');
                 }}
-                className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSavePromise}
-                className="flex-1 bg-blue-600 text-white p-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                className="flex-1 bg-blue-600 text-white p-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
               >
-                🌿 Plant It
+                🌿 Plant It 🌿
               </button>
             </div>
           </div>
@@ -1842,12 +1841,12 @@ export default function Dashboard() {
       {/* Trust Circle Creation Modal */}
       {showTrustCircleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h2 className="text-xl font-bold text-center mb-5 text-blue-600 dark:text-blue-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-4 shadow-2xl">
+            <h2 className="text-xl font-bold text-center mb-4 text-blue-600 dark:text-blue-400">
               👥 Create Trust Circle
             </h2>
             
-            <p className="text-gray-500 dark:text-gray-400 text-center mb-5 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-center mb-4 text-sm">
               Create a small accountability group (3-5 people) for building trust together
             </p>
             
@@ -1857,7 +1856,7 @@ export default function Dashboard() {
               placeholder="Circle name (e.g., Morning Journalers)"
               value={circleName}
               onChange={(e) => setCircleName(e.target.value)}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white text-sm"
             />
             
             {/* Circle Description */}
@@ -1865,22 +1864,22 @@ export default function Dashboard() {
               placeholder="Brief description of your circle's purpose"
               value={circleDescription}
               onChange={(e) => setCircleDescription(e.target.value)}
-              rows={3}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg mb-4 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white resize-none"
+              rows={2}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg mb-3 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 dark:bg-gray-700 dark:text-white resize-none text-sm"
             />
             
             {/* Circle Members Section */}
-            <div className="mb-5 p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
-              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Add Members (2-4 people)</h3>
+            <div className="mb-4 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
+              <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2 text-sm">Add Members (2-4 people)</h3>
               
               {/* Current Members */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <div className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">
+              <div className="flex flex-wrap gap-1 mb-2">
+                <div className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                   <span>👤</span>
                   <span>You</span>
                 </div>
                 {circleMembers.map((contact, i) => (
-                  <div key={i} className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full">
+                  <div key={i} className="flex items-center gap-1 bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full text-xs">
                     <span>{contact.type === 'phone' ? '📱' : '✉️'}</span>
                     <span>{contact.value}</span>
                     <button 
@@ -1894,12 +1893,12 @@ export default function Dashboard() {
               </div>
               
               {/* Add Members Buttons */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
                     key={type}
                     onClick={() => setShowContactModal({ type: 'phone', visible: true, forCircle: true })}
-                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors text-sm"
+                    className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2 py-1 rounded-lg transition-colors text-xs"
                   >
                     {type === 'Family' && '👨‍👩‍👧‍👦'}
                     {type === 'Friends' && '👫'}
@@ -1909,7 +1908,7 @@ export default function Dashboard() {
               </div>
               
               {/* Member Count Info */}
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {circleMembers.length === 0 
                   ? 'Add 2-4 members to complete your Trust Circle (3-5 people total)'
                   : circleMembers.length === 1
@@ -1923,7 +1922,7 @@ export default function Dashboard() {
             </div>
             
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => {
                   setShowTrustCircleModal(false);
@@ -1931,7 +1930,7 @@ export default function Dashboard() {
                   setCircleDescription('');
                   setCircleMembers([]);
                 }}
-                className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
               >
                 Cancel
               </button>
@@ -1942,14 +1941,14 @@ export default function Dashboard() {
                   circleMembers.length >= 2 && circleMembers.length <= 4 
                     ? 'bg-blue-600 text-white' 
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                } p-3 rounded-lg font-medium`}
+                } p-2 rounded-lg font-medium text-sm`}
               >
                 Create Circle
               </button>
             </div>
             
             {/* Trust Circle Guidelines */}
-            <div className="mt-5 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-sm text-gray-600 dark:text-gray-300">
+            <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-xs text-gray-600 dark:text-gray-300">
               <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">Why Trust Circles?</h4>
               <p>
                 Trust Circles are small accountability groups (3-5 people) designed specifically for building trust through shared promises. Unlike large social networks, these intimate circles foster meaningful connections where trust can actually grow.
@@ -1962,36 +1961,36 @@ export default function Dashboard() {
       {/* Promise Detail Modal */}
       {selectedPromise && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">{selectedPromise.emoji}</span>
-              <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-2xl">{selectedPromise.emoji}</span>
+              <h2 className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 {selectedPromise.title}
               </h2>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 mb-5">
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
               <strong>Status:</strong> {selectedPromise.status === 'aligned' ? '✅ Done' : '🔄 Active'}<br/>
               <strong>Deadline:</strong> {selectedPromise.deadline ? convertFirestoreDate(selectedPromise.deadline).toLocaleDateString() : 'No deadline'}<br/>
               <strong>Progress:</strong> {selectedPromise.progress}
             </p>
-            <div className="p-5 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-900">
-              <h3 className="text-lg font-medium text-cyan-700 dark:text-cyan-300 flex items-center gap-2 mb-3">
+            <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border border-cyan-200 dark:border-cyan-900">
+              <h3 className="text-base font-medium text-cyan-700 dark:text-cyan-300 flex items-center gap-2 mb-2">
                 <span>🤖</span> AI Coach Suggests:
               </h3>
-              <p className="text-gray-700 dark:text-gray-200">
+              <p className="text-gray-700 dark:text-gray-200 text-sm">
                 No AI coach suggestions available in production mode. This feature will be added in a future update.
               </p>
             </div>
             <button
               onClick={() => alert("🛠️ Support Ticket: Our team will help you within 24 hours.")}
-              className="w-full mt-5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="w-full mt-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
             >
               🛠️ Need Help?
             </button>
-            <div className="flex gap-3 mt-5">
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setSelectedPromise(null)}
-                className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
               >
                 Close
               </button>
@@ -2001,7 +2000,7 @@ export default function Dashboard() {
                     handleConfirm(selectedPromise);
                     setSelectedPromise(null);
                   }}
-                  className="flex-1 bg-green-600 text-white p-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  className="flex-1 bg-green-600 text-white p-2 rounded-lg font-medium hover:bg-green-700 transition-colors text-sm"
                 >
                   ✅ Mark Done
                 </button>
@@ -2017,25 +2016,25 @@ export default function Dashboard() {
           {/* Promise Card Animation */}
           <div
             ref={promiseCardRef}
-            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg cursor-pointer"
+            className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg cursor-pointer"
             style={{
               transform: 'translateX(100%)',
               animation: 'slideIn 1s ease forwards'
             }}
           >
             {/* Status Badge */}
-            <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
+            <div className="absolute top-2 right-2 px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
               🟢 Active
             </div>
             
             {/* Card Content */}
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{newPromise?.emoji}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{newPromise?.emoji}</span>
               <div className="flex-1">
-                <h3 className="font-medium text-gray-800 dark:text-gray-200">
+                <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
                   {newPromise?.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {newPromise?.progress} • Due: {newPromise?.deadline ? convertFirestoreDate(newPromise.deadline).toLocaleDateString() : 'No deadline'}
                 </p>
               </div>
@@ -2127,10 +2126,10 @@ export default function Dashboard() {
           onClick={completeOnboarding}
         >
           <div 
-            className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl relative"
+            className="bg-white dark:bg-gray-800 rounded-2xl p-4 max-w-md w-full mx-4 shadow-2xl relative"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute top-4 right-4">
+            <div className="absolute top-2 right-2">
               <button
                 onClick={completeOnboarding}
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -2139,34 +2138,34 @@ export default function Dashboard() {
               </button>
             </div>
             
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center text-white text-2xl mx-auto mb-4">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 flex items-center justify-center text-white text-xl mx-auto mb-3">
                 🌱
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-1">
                 Welcome to TrustNet
               </h2>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 Your 20-second guided tour to building authentic trust
               </p>
             </div>
             
-            <div className="mb-6">
-              <div className="flex justify-center mb-4">
+            <div className="mb-4">
+              <div className="flex justify-center mb-3">
                 {ONBOARDING_STEPS.map((_, index) => (
                   <div
                     key={index}
-                    className={`w-2 h-2 rounded-full mx-1 ${
-                      index === onboardingStep ? 'bg-cyan-500 w-4' : 'bg-gray-300 dark:bg-gray-600'
+                    className={`w-1.5 h-1.5 rounded-full mx-0.5 ${
+                      index === onboardingStep ? 'bg-cyan-500 w-3' : 'bg-gray-300 dark:bg-gray-600'
                     }`}
                   ></div>
                 ))}
               </div>
               
-              <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">
+              <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-1">
                 {ONBOARDING_STEPS[onboardingStep].title}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 dark:text-gray-300 text-sm">
                 {ONBOARDING_STEPS[onboardingStep].content}
               </p>
             </div>
@@ -2174,13 +2173,13 @@ export default function Dashboard() {
             <div className="flex justify-between">
               <button
                 onClick={completeOnboarding}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 text-sm"
               >
                 Skip Tour
               </button>
               <button
                 onClick={completeOnboarding}
-                className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity text-sm"
               >
                 Get Started
               </button>
@@ -2191,10 +2190,10 @@ export default function Dashboard() {
               <div 
                 className="fixed bg-black/30 rounded-xl pointer-events-none"
                 style={{
-                  top: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().top + window.scrollY - 20,
-                  left: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().left - 20,
-                  width: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().width + 40,
-                  height: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().height + 40
+                  top: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().top + window.scrollY - 10,
+                  left: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().left - 10,
+                  width: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().width + 20,
+                  height: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().height + 20
                 }}
               ></div>
             )}
