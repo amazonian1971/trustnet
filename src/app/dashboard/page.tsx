@@ -52,7 +52,6 @@ const getReminderMessage = (promises: any[]) => {
   
   return `Don't forget about your active promises!`;
 };
-
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [streak, setStreak] = useState(0);
@@ -334,8 +333,8 @@ export default function Dashboard() {
       
       // Show browser notification if permitted
       if (canShowNotifications) {
-        // FIX: Use absolute path for icon to avoid 404
-        const iconPath = window.location.origin + '/icon-192.png';
+        // FIX: Use relative path for icon to avoid 404
+        const iconPath = '/icon-192.png';
         new Notification('TrustNet Reminder', {
           body: message,
           icon: iconPath
@@ -458,8 +457,15 @@ export default function Dashboard() {
       cleanedPhone = '+' + cleanedPhone;
     }
     
+    // FIX: Properly format for WhatsApp URL
+    const whatsappUrl = `https://wa.me/${cleanedPhone.replace('+', '')}`;
+    
     const message = encodeURIComponent(`I've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?`);
-    window.open(`https://wa.me/${cleanedPhone.replace('+', '')}?text=${message}`, '_blank');
+    
+    // FIX: Open in new tab with proper URL
+    window.open(`${whatsappUrl}?text=${message}`, '_blank', 'noopener,noreferrer');
+    
+    console.log('Opening WhatsApp with URL:', `${whatsappUrl}?text=${message}`);
   };
 
   // SMS deep link - FIXED
@@ -708,7 +714,8 @@ export default function Dashboard() {
         if (contact.type === 'phone') {
           if (window.confirm(`📱 Send nudge to ${contact.value}?`)) {
             const message = encodeURIComponent(`Just checking in about our agreement: "${promise.title}"`);
-            window.open(`https://wa.me/${contact.value.replace(/\D/g, '')}?text=${message}`, '_blank');
+            // FIX: Use the proper sendWhatsApp function
+            sendWhatsApp(contact.value);
             nudgeCount++;
           }
         } else if (contact.type === 'email') {
@@ -797,7 +804,7 @@ export default function Dashboard() {
     }
   };
 
-  // Handle Trust Circle creation
+  // Handle Trust Circle creation - FIXED
   const handleCreateTrustCircle = async () => {
     if (!circleName.trim()) {
       alert('Please enter a name for your Trust Circle');
@@ -827,6 +834,8 @@ export default function Dashboard() {
         trustScoreImpact: 2
       });
       
+      console.log('Trust Circle created with ID:', docRef.id);
+      
       // Update trust score for creating a meaningful circle
       const impact = calculateTrustImpact('circle-creation');
       setTrustScore(prev => Math.min(100, prev + impact));
@@ -838,6 +847,9 @@ export default function Dashboard() {
       setCircleDescription('');
       setCircleMembers([]);
       
+      // FIX: Generate proper join link
+      const joinLink = `${window.location.origin}/join-circle?circleId=${docRef.id}`;
+      
       // Optionally send invites to members
       circleMembers.forEach(contact => {
         if (contact.type === 'phone') {
@@ -845,8 +857,9 @@ export default function Dashboard() {
             const message = encodeURIComponent(
               `You've been invited to join "${circleName}" Trust Circle on TrustNet! ` +
               `This is a small accountability group for building trust together. ` +
-              `Join now: [TrustNet Link]`
+              `Join now: ${joinLink}`
             );
+            // FIX: Use the proper sendWhatsApp function with the actual link
             window.open(`https://wa.me/${contact.value.replace(/\D/g, '')}?text=${message}`, '_blank');
           }
         } else {
@@ -856,7 +869,7 @@ export default function Dashboard() {
               `Hi,\n\nYou've been invited to join "${circleName}" Trust Circle on TrustNet!\n\n` +
               `This is a small accountability group (3-5 people) designed for building trust together.\n\n` +
               `About this circle: ${circleDescription || 'No description provided'}\n\n` +
-              `Join now: [TrustNet Link]\n\n` +
+              `Join now: ${joinLink}\n\n` +
               `Best regards,\nTrustNet`
             );
             window.open(`mailto:${contact.value}?subject=${subject}&body=${body}`, '_blank');
@@ -864,6 +877,7 @@ export default function Dashboard() {
         }
       });
     } catch (error) {
+      console.error("Error creating Trust Circle:", error);
       alert('Error creating Trust Circle: ' + error.message);
     }
   };
@@ -994,7 +1008,8 @@ export default function Dashboard() {
       {showFeedbackButton && (
         <button
           onClick={() => {
-            const feedbackUrl = 'https://forms.gle/YOUR_FEEDBACK_FORM_LINK';
+            // FIX: Use the correct feedback form URL
+            const feedbackUrl = 'https://form.typeform.com/to/lQcv9djs';
             window.open(feedbackUrl, '_blank');
           }}
           className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-xl shadow-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-2 animate-fade-in"
@@ -1020,50 +1035,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* SEO Structured Data */}
-      <script 
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "TrustNet - The First Social Platform Where Trust is the Currency",
-            "description": "Build meaningful relationships through small accountability groups and promises. Track your trust score and grow authentic connections.",
-            "applicationCategory": "Social Networking",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "operatingSystem": "All",
-            "keywords": "trust, social network, accountability, promises, trust score, relationship building, small groups, trust circles, social platform",
-            "url": "https://trustnet.example.com",
-            "image": "https://trustnet.example.com/og-image.jpg",
-            "creator": {
-              "@type": "Organization",
-              "name": "TrustNet Team",
-              "url": "https://trustnet.example.com"
-            }
-          })
-        }}
-      />
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href="https://trustnet.example.com/dashboard" />
-      
-      {/* Open Graph Meta Tags */}
-      <meta property="og:title" content="TrustNet Dashboard - Build Trust Through Promises" />
-      <meta property="og:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta property="og:image" content="https://trustnet.example.com/og-dashboard.jpg" />
-      <meta property="og:url" content="https://trustnet.example.com/dashboard" />
-      <meta property="og:type" content="website" />
-      
-      {/* Twitter Card Meta Tags */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content="TrustNet Dashboard - Build Trust Through Promises" />
-      <meta name="twitter:description" content="Track your trust score, make promises, and join small accountability groups to build authentic relationships." />
-      <meta name="twitter:image" content="https://trustnet.example.com/og-dashboard.jpg" />
-      
       {/* Performance Optimization: Preload critical resources */}
       <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       
