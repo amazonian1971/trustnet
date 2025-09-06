@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, query, onSnapshot, updateDoc, deleteDoc, doc, getDoc, setDoc, where } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, updateDoc, deleteDoc, doc, getDoc, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 // Helper function to convert Firestore date objects to JavaScript Date objects
@@ -52,6 +52,7 @@ const getReminderMessage = (promises: any[]) => {
   
   return `Don't forget about your active promises!`;
 };
+
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [streak, setStreak] = useState(0);
@@ -146,7 +147,7 @@ export default function Dashboard() {
     return filteredPosts;
   };
 
-  // Load theme - FIXED VERSION
+  // Load theme
   useEffect(() => {
     const saved = localStorage.getItem('darkMode');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -186,7 +187,7 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, [router]);
 
-  // Load user activity and trust score from Firestore - FIXED
+  // Load user activity and trust score from Firestore
   useEffect(() => {
     if (!user) return;
     
@@ -206,7 +207,7 @@ export default function Dashboard() {
             setShowOnboarding(true);
           }
         } else {
-          // NEW: Create initial activity record with proper structure
+          // Create initial activity record with proper structure
           await setDoc(doc(db, 'userActivity', user.uid), {
             firstVisit: new Date().toISOString(),
             promisesCreated: 0,
@@ -270,7 +271,7 @@ export default function Dashboard() {
       setPromises(list);
       setIsLoading(false);
       
-      // Update user activity in Firestore - FIXED
+      // Update user activity in Firestore
       if (user) {
         const updateUserActivity = async () => {
           try {
@@ -333,7 +334,7 @@ export default function Dashboard() {
       
       // Show browser notification if permitted
       if (canShowNotifications) {
-        // FIX: Use relative path for icon to avoid 404
+        // Use relative path for icon to avoid 404
         const iconPath = '/icon-192.png';
         new Notification('TrustNet Reminder', {
           body: message,
@@ -431,7 +432,7 @@ export default function Dashboard() {
     setCircleMembers(prev => prev.filter((_, i) => i !== index));
   };
 
-  // WhatsApp deep link - FIXED
+  // WhatsApp deep link
   const sendWhatsApp = (phone: string) => {
     // Clean phone number and ensure it has country code
     let cleanedPhone = phone.replace(/\D/g, '');
@@ -457,18 +458,16 @@ export default function Dashboard() {
       cleanedPhone = '+' + cleanedPhone;
     }
     
-    // FIX: Properly format for WhatsApp URL
+    // Properly format for WhatsApp URL
     const whatsappUrl = `https://wa.me/${cleanedPhone.replace('+', '')}`;
     
     const message = encodeURIComponent(`I've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?`);
     
-    // FIX: Open in new tab with proper URL
+    // Open in new tab with proper URL
     window.open(`${whatsappUrl}?text=${message}`, '_blank', 'noopener,noreferrer');
-    
-    console.log('Opening WhatsApp with URL:', `${whatsappUrl}?text=${message}`);
   };
 
-  // SMS deep link - FIXED
+  // SMS deep link
   const sendSMS = (phone: string) => {
     // Clean phone number
     let cleanedPhone = phone.replace(/\D/g, '');
@@ -498,7 +497,7 @@ export default function Dashboard() {
     window.open(`sms:${cleanedPhone}?&body=${message}`, '_blank');
   };
 
-  // Email deep link - FIXED
+  // Email deep link
   const sendEmail = (email: string) => {
     const subject = encodeURIComponent("Join me in my TrustNet promise");
     const body = encodeURIComponent(`Hi,\n\nI've made a promise on TrustNet: "${title}". Would you like to be my accountability partner?\n\nCheck it out: [TrustNet Link]`);
@@ -656,16 +655,43 @@ export default function Dashboard() {
 
   // Delete promise functionality - FIXED AND ENSURED TO WORK
   const handleDeletePromise = async (promise: any) => {
+    // Enhanced validation
+    if (!promise) {
+      console.error('Cannot delete: promise object is undefined');
+      alert('Error: Invalid promise. Please refresh the page and try again.');
+      return;
+    }
+    
+    if (!promise.id) {
+      console.error('Cannot delete: promise ID is missing', promise);
+      alert('Error: Promise ID is missing. Please refresh the page and try again.');
+      return;
+    }
+    
     if (!window.confirm("Are you sure you want to delete this promise? This cannot be undone.")) {
       return;
     }
     
     try {
-      // Log for debugging
       console.log('Deleting promise:', promise.id);
       
+      // Add additional safety checks
+      const promiseRef = doc(db, 'promises', promise.id);
+      const promiseSnap = await getDoc(promiseRef);
+      
+      if (!promiseSnap.exists()) {
+        console.warn('Promise already deleted or does not exist:', promise.id);
+        alert('This promise has already been deleted or does not exist.');
+        
+        // Update local state to reflect deletion
+        if (selectedPromise && selectedPromise.id === promise.id) {
+          setSelectedPromise(null);
+        }
+        return;
+      }
+      
       // Delete from Firestore
-      await deleteDoc(doc(db, 'promises', promise.id));
+      await deleteDoc(promiseRef);
       
       // Impact trust score for deletion
       const impact = calculateTrustImpact('deletion');
@@ -678,9 +704,20 @@ export default function Dashboard() {
       if (selectedPromise && selectedPromise.id === promise.id) {
         setSelectedPromise(null);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting promise:', error);
-      alert('Error deleting promise: ' + error.message);
+      
+      // User-friendly error message
+      let errorMessage = 'Error deleting promise';
+      if (error.message.includes('permission-denied')) {
+        errorMessage += ': You don\'t have permission to delete this promise';
+      } else if (error.message.includes('not-found')) {
+        errorMessage += ': Promise not found in database';
+      } else if (error.message.includes('invalid-argument')) {
+        errorMessage += ': Invalid promise data format';
+      }
+      
+      alert(errorMessage + '. Please try again or contact support.');
     }
   };
 
@@ -714,7 +751,6 @@ export default function Dashboard() {
         if (contact.type === 'phone') {
           if (window.confirm(`📱 Send nudge to ${contact.value}?`)) {
             const message = encodeURIComponent(`Just checking in about our agreement: "${promise.title}"`);
-            // FIX: Use the proper sendWhatsApp function
             sendWhatsApp(contact.value);
             nudgeCount++;
           }
@@ -1004,11 +1040,11 @@ export default function Dashboard() {
       itemScope 
       itemType="https://schema.org/WebApplication"
     >
-      {/* In-App Feedback Button - FIXED AND ENSURED TO SHOW */}
+      {/* In-App Feedback Button */}
       {showFeedbackButton && (
         <button
           onClick={() => {
-            // FIX: Use the correct feedback form URL
+            // FIX: Use the correct Typeform feedback URL
             const feedbackUrl = 'https://form.typeform.com/to/lQcv9djs';
             window.open(feedbackUrl, '_blank');
           }}
@@ -1035,11 +1071,8 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Performance Optimization: Preload critical resources */}
-      <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header - Semantic Header Tag */}
+        {/* Header */}
         <header 
           className="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50"
           role="banner"
@@ -1085,7 +1118,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Trust Score Section - Semantic Section Tag */}
+        {/* Trust Score Section */}
         <section 
           ref={trustBarRef}
           className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl"
@@ -1134,7 +1167,7 @@ export default function Dashboard() {
           `}</style>
         </section>
 
-        {/* Daily Builder Card - Semantic Section Tag */}
+        {/* Daily Builder Card */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
             <div className="mb-3 sm:mb-0">
@@ -1171,7 +1204,7 @@ export default function Dashboard() {
           </button>
         </section>
 
-        {/* Trust Feed Section - Semantic Section Tag */}
+        {/* Trust Feed Section */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>📰</span> Trust Feed
@@ -1216,7 +1249,7 @@ export default function Dashboard() {
                 key={p.id} 
                 className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow relative"
               >
-                {/* DELETE BUTTON FOR FEED POSTS - FIXED AND ENSURED TO BE VISIBLE */}
+                {/* DELETE BUTTON FOR FEED POSTS */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1302,7 +1335,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Trust Circles Section - Semantic Section Tag */}
+        {/* Trust Circles Section */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
             <h2 className="text-lg font-bold flex items-center gap-2 mb-2 sm:mb-0">
@@ -1336,7 +1369,7 @@ export default function Dashboard() {
             ) : (
               promises.filter(p => p.trustCircleId).map((circle, index) => (
                 <div key={index} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 relative">
-                  {/* DELETE BUTTON FOR TRUST CIRCLES - FIXED AND ENSURED TO BE VISIBLE */}
+                  {/* DELETE BUTTON FOR TRUST CIRCLES */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1379,7 +1412,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Dashboard Tabs - Semantic Section Tag */}
+        {/* Dashboard Tabs */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-3 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <div className="flex flex-col sm:flex-row mb-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 rounded-xl overflow-hidden">
             {['Active', 'Completed', 'Archived'].map((tab) => (
@@ -1416,7 +1449,7 @@ export default function Dashboard() {
                     ref={p.id === newPromise?.id ? promiseCardRef : null}
                     className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1 relative"
                   >
-                    {/* DELETE BUTTON FOR PROMISE CARDS - FIXED AND ENSURED TO BE VISIBLE */}
+                    {/* DELETE BUTTON FOR PROMISE CARDS */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1476,7 +1509,7 @@ export default function Dashboard() {
                     key={p.id}
                     className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md relative"
                   >
-                    {/* DELETE BUTTON FOR COMPLETED PROMISES - FIXED AND ENSURED TO BE VISIBLE */}
+                    {/* DELETE BUTTON FOR COMPLETED PROMISES */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1524,7 +1557,7 @@ export default function Dashboard() {
                     key={p.id}
                     className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 cursor-pointer transition-all hover:shadow-md opacity-70 relative"
                   >
-                    {/* DELETE BUTTON FOR ARCHIVED PROMISES - FIXED AND ENSURED TO BE VISIBLE */}
+                    {/* DELETE BUTTON FOR ARCHIVED PROMISES */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1560,7 +1593,7 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* Trust Snapshot Section - Semantic Section Tag */}
+        {/* Trust Snapshot Section */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>🔍</span> Trust Snapshot
@@ -1644,7 +1677,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Active Agreements Zone - Semantic Section Tag */}
+        {/* Active Agreements Zone */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>📄</span> Active Agreements
@@ -1713,7 +1746,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Next Actions Zone - Semantic Section Tag */}
+        {/* Next Actions Zone */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>🚀</span> Next Actions
@@ -1726,7 +1759,7 @@ export default function Dashboard() {
               .filter(p => p.status === 'drafting')
               .map(p => (
                 <div key={p.id} className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border-l-4 border-red-500 flex items-center gap-3 relative">
-                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  {/* DELETE BUTTON FOR NEXT ACTIONS */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1777,7 +1810,7 @@ export default function Dashboard() {
               .filter(p => p.status === 'active')
               .map(p => (
                 <div key={p.id} className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl border-l-4 border-cyan-500 flex items-center gap-3 relative">
-                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  {/* DELETE BUTTON FOR NEXT ACTIONS */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1828,7 +1861,7 @@ export default function Dashboard() {
               .filter(p => p.status === 'active' && p.progress && p.progress.includes('Day'))
               .map(p => (
                 <div key={p.id} className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-l-4 border-yellow-500 flex items-center gap-3 relative">
-                  {/* DELETE BUTTON FOR NEXT ACTIONS - FIXED AND ENSURED TO BE VISIBLE */}
+                  {/* DELETE BUTTON FOR NEXT ACTIONS */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1876,7 +1909,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Progress Tracker Zone - Semantic Section Tag */}
+        {/* Progress Tracker Zone */}
         <section className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <span>📈</span> Progress Tracker
@@ -1976,7 +2009,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Footer - Semantic Footer Tag */}
+        {/* Footer */}
         <footer className="text-center mt-4 text-gray-500 dark:text-gray-400 text-xs" role="contentinfo">
           <p>&quot;A promise made is a seed planted.&quot;</p>
           <p>Powered by TrustNet • The first social platform where trust is the currency</p>
@@ -2044,7 +2077,7 @@ export default function Dashboard() {
                 ))}
               </div>
               
-              {/* Contact Type Buttons - FIXED */}
+              {/* Contact Type Buttons */}
               <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
@@ -2179,7 +2212,7 @@ export default function Dashboard() {
                 ))}
               </div>
               
-              {/* Contact Type Buttons - FIXED */}
+              {/* Contact Type Buttons */}
               <div className="flex gap-1 mb-2">
                 {['Family', 'Friends', 'Colleagues'].map((type) => (
                   <button
@@ -2351,46 +2384,6 @@ export default function Dashboard() {
       {/* Cinematic Launch Sequence Overlay */}
       {showLaunchSequence && (
         <div className="fixed inset-0 bg-white flex items-center justify-center z-50 transition-opacity duration-300">
-          {/* Promise Card Animation */}
-          <div
-            ref={promiseCardRef}
-            className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg cursor-pointer"
-            style={{
-              transform: 'translateX(100%)',
-              animation: 'slideIn 1s ease forwards'
-            }}
-          >
-            {/* Status Badge */}
-            <div className="absolute top-2 right-2 px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200">
-              🟢 Active
-            </div>
-            
-            {/* Card Content */}
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{newPromise?.emoji}</span>
-              <div className="flex-1">
-                <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm">
-                  {newPromise?.title}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {newPromise?.progress} • Due: {newPromise?.deadline ? convertFirestoreDate(newPromise.deadline).toLocaleDateString() : 'No deadline'}
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          <style jsx>{`
-            @keyframes slideIn {
-              0% {
-                transform: translateX(100%);
-                opacity: 0;
-              }
-              100% {
-                transform: translateX(0);
-                opacity: 1;
-              }
-            }
-          `}</style>
         </div>
       )}
 
@@ -2456,7 +2449,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Onboarding Tour - FIXED VERSION */}
+      {/* Onboarding Tour */}
       {showOnboarding && (
         <div 
           ref={onboardingRef}
@@ -2528,19 +2521,6 @@ export default function Dashboard() {
                 {onboardingStep < ONBOARDING_STEPS.length - 1 ? 'Next' : 'Get Started'}
               </button>
             </div>
-            
-            {/* Highlight Overlay */}
-            {ONBOARDING_STEPS[onboardingStep].target && (
-              <div 
-                className="fixed bg-black/30 rounded-xl pointer-events-none"
-                style={{
-                  top: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().top + window.scrollY - 10,
-                  left: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().left - 10,
-                  width: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().width + 20,
-                  height: ONBOARDING_STEPS[onboardingStep].target.current?.getBoundingClientRect().height + 20
-                }}
-              ></div>
-            )}
           </div>
         </div>
       )}
